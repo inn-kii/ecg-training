@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>心電図トレーニング</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: clinical, calm, fast to use on a phone between calls
+   IDEA: a 3-lead monitor printout — pink grid paper strip
+   PICTURE: the body chart for electrodes, then the printed strip
+   COLOUR and TYPE: navy + ECG-paper pink + electrode red/yellow/green; Noto Sans JP
+   LAYOUT: one column of steps: case → electrodes → strip → answer */
+:root{color-scheme:light dark;--bg:light-dark(#f3f5f9,#0d1424);--card:light-dark(#fff,#162038);--ink:light-dark(#14233b,#e8edf5);--mut:light-dark(#5b687c,#9eabc0);--line:light-dark(#d8dee8,#2b3756);--acc:light-dark(#1d3a64,#9dbcff);--navy:#1d3a64;--ok:#1f9d4a;--ng:#d62b2b}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans JP","Hiragino Sans",sans-serif;overflow-x:clip}
+header{background:var(--navy);color:#fff;padding:12px max(4vw,16px);display:flex;align-items:center;gap:10px}
+header h1{margin:0;font-size:20px;line-height:1.2;font-weight:900;flex:1}
+header .btn{border-color:#fff;color:#fff;min-height:38px;padding:4px 12px;font-size:14px}
+main{max-width:760px;margin:0 auto;padding:14px max(3vw,12px) 48px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+h2{font-size:17px;margin:0 0 8px;line-height:1.35}
+.mut{color:var(--mut);font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--acc);background:transparent;color:var(--acc);font:inherit;font-weight:700;cursor:pointer;text-align:center}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn:focus-visible,.ch:focus-visible,.pk:focus-visible{outline:3px solid #8fb4ff;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px}.row>.btn{flex:1 1 140px}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 12px}.prog i{display:block;height:100%;background:var(--acc)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:1px 10px;border-radius:20px;background:var(--navy);color:#fff;margin-bottom:6px}
+.sc{font-size:17px;font-weight:700}
+.pks{display:flex;gap:8px;margin-bottom:6px}
+.pk{flex:1;min-height:44px;border-radius:10px;border:3px solid transparent;font:inherit;font-weight:900;color:#fff;cursor:pointer;opacity:.55}
+.pk.on{opacity:1;border-color:var(--ink)}
+.pk[data-c=r]{background:#d62b2b}.pk[data-c=y]{background:#e8b600;color:#222}.pk[data-c=g]{background:#1f9d4a}
+.body{max-width:420px;margin:0 auto}.body svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.hit{cursor:pointer}
+.pl{font-size:14px;margin:6px 0 10px;display:grid;gap:2px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+.fb{border-radius:10px;padding:10px 12px;margin-top:10px;font-size:15px}
+.fb.ok{background:light-dark(#e4f5ea,#143424);border:1.5px solid var(--ok)}
+.fb.ng{background:light-dark(#fde6e6,#3a1820);border:1.5px solid var(--ng)}
+.fb b.big{font-size:18px}
+.paper{background:#fff5f6;border:1px solid #efc1c9;border-radius:8px;overflow:hidden}
+.paper canvas{display:block;width:100%}
+.ch{display:block;width:100%;text-align:left;min-height:48px;margin-top:8px;padding:10px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.ch.ok{border-color:var(--ok);background:light-dark(#e4f5ea,#143424)}
+.ch.ng{border-color:var(--ng);background:light-dark(#fde6e6,#3a1820)}
+ul.pts{margin:6px 0 0;padding-left:1.2em}ul.pts li{margin:2px 0}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.lib .btn{font-size:14px;min-height:48px;padding:6px 8px}
+.cat{font-weight:700;font-size:14px;margin:12px 0 6px;color:var(--mut)}
+.sw{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:700}
+.sw input{width:22px;height:22px}
+.big{font-size:40px;font-weight:900;line-height:1.1}
+.sm{font-size:13px;color:var(--mut);margin-top:6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{min-height:40px;min-width:48px;padding:4px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}.seg button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.paper{position:relative}
+.hrbox{display:flex;align-items:baseline;gap:6px;background:#0b1220;color:#4ef07a;border-radius:8px;padding:4px 12px;margin-bottom:8px;font-weight:900;width:max-content}
+.hrbox b{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}.hrbox span{font-size:13px;color:#9fe9b5}
+.cur{position:absolute;width:2px;background:rgba(29,98,220,.75);pointer-events:none;display:none}
+.heart{max-width:380px;margin:0 auto}.heart.nocd .cd,.heart.nolb .lb{display:none}.heart svg{width:100%;height:auto;display:block}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--mut);margin-top:4px}
+.hwrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center}
+.lsel{display:grid;grid-template-columns:repeat(2,46px);gap:5px}.lsel .t{grid-column:span 2;font-size:11px;color:var(--mut);text-align:center;font-weight:700}
+.lsel button{min-height:38px;padding:0;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.lsel button.on{background:#1d5fd0;border-color:#1d5fd0;color:#fff}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header><h1>心電図トレーニング</h1><button class="btn" id="home">ホーム</button></header>
+<main id="app"></main>
+<script>
+{
+const FS=250,DUR=15,N=FS*DUR;
+const rn=(a,b)=>a+Math.random()*(b-a);
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+/* ---- 電極位置と双極子モデル ---- */
+const SPOT={RSC:[128,98,.6,'右鎖骨下'],LSC:[272,98,.6,'左鎖骨下'],LLA:[282,305,.6,'左下腹部（肋骨弓下）'],MAN:[200,92,.85,'胸骨柄'],CM1:[180,177,.85,'第4肋間 胸骨右縁'],CM2:[220,177,.85,'第4肋間 胸骨左縁'],CM3:[247,191,.75,'V2とV4の中点'],CM4:[274,205,.6,'第5肋間 左鎖骨中線'],CM5:[308,205,.3,'左前腋窩線（V4の高さ）'],CM6:[336,205,0,'左中腋窩線（V4の高さ）'],CM4R:[126,205,.6,'右第5肋間 鎖骨中線（V4R）']};
+const P3X={V7:[1.4,.55,-.7],V8:[1.0,.55,-1.2],V9:[.45,.55,-1.35]};
+const FAR={RSC:[-.866,-.5,0],LSC:[.866,-.5,0],LLA:[0,1,0]},FC=.5,HC=[.3,.42,0];
+const nz=d=>{const m=Math.hypot(d[0],d[1],d[2]);return[d[0]/m,d[1]/m,d[2]/m]};
+const neg=d=>[-d[0],-d[1],-d[2]];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+function fe(k){if(FAR[k])return FAR[k].map(v=>v*FC);let q;if(P3X[k])q=P3X[k];else{const[a,b,z]=SPOT[k];q=[(a-200)/100,(b-150)/100,z]}const r=[q[0]-HC[0],q[1]-HC[1],q[2]-HC[2]],m=Math.hypot(r[0],r[1],r[2])**3;return r.map(v=>v/m)}
+const LV=(p,n)=>{const a=fe(p),b=fe(n);return[a[0]-b[0],a[1]-b[1],a[2]-b[2]]};
+const D={P:[.6,.75,.1],Q:[-.6,.3,.75],R:[.5,.65,-.6],S:[-.35,-.6,-.6],T:[.6,.7,.2],ANT:[.35,.1,.93],LAT:[.8,.3,.4],RB:[-.5,.1,.85],LB:[.75,.3,-.6],F:[.1,.8,.5],V:[.2,.9,-.4],V2:[-.4,-.85,.2],INF:[-.35,.94,0],LATH:[.85,-.4,.2],POST:[.3,.15,-.95],RVI:[-.8,.35,.45],ANTR:[-.2,0,1],EXT:[.5,-.2,.85],HL:[.75,-.55,.35],APEX:[.45,.7,.55],LMTI:[-.6,-.75,.1],PC:[.3,-.85,-.3],SP:[.2,1,.4]};
+const K=1/dot(LV('LLA','RSC'),nz(D.R));
+function sigNew(){return{x:new Float64Array(N),y:new Float64Array(N),z:new Float64Array(N),sp:[],n:new Float64Array(N),qrs:[],ev:[]}}
+const EV=(s,k,t,o)=>{s.ev.push(Object.assign({k,t},o||{}));if(k==='V')s.qrs.push(t+.04)};
+function G(s,a,mu,s1,s2,d){s2=s2||s1;const v=nz(d).map(c=>c*a*K),i0=Math.max(0,Math.floor((mu-5*s1)*FS)),i1=Math.min(N-1,Math.ceil((mu+5*s2)*FS));for(let i=i0;i<=i1;i++){const q=i/FS-mu,w=q<0?s1:s2,g=Math.exp(-.5*q*q/(w*w));s.x[i]+=v[0]*g;s.y[i]+=v[1]*g;s.z[i]+=v[2]*g}}
+function PL(s,a,t1,t2,e,d){const v=nz(d).map(c=>c*a*K),i0=Math.max(0,Math.floor((t1-6*e)*FS)),i1=Math.min(N-1,Math.ceil((t2+6*e)*FS));for(let i=i0;i<=i1;i++){const t=i/FS,g=1/(1+Math.exp(-(t-t1)/e))-1/(1+Math.exp(-(t-t2)/e));s.x[i]+=v[0]*g;s.y[i]+=v[1]*g;s.z[i]+=v[2]*g}}
+function AV(s,i,a,d){const v=nz(d);s.x[i]+=v[0]*a*K;s.y[i]+=v[1]*a*K;s.z[i]+=v[2]*a*K}
+function beat(s,t,o){o=Object.assign({p:.15,pD:D.P,pr:.16,q:.12,r:1.1,rw:.011,sw:.22,ta:.3,tD:D.T,tc:.26,t1:.05,t2:.035,st:0,stD:D.ANT,u:0},o||{});
+ if(o.p){G(s,o.p,t-o.pr+.01,.022,.022,o.pD);EV(s,'A',t-o.pr-.04,{ec:o.pD!==D.P})}
+ EV(s,'V',t-.04,{v:'n'});
+ G(s,o.q,t-.022,.008,.008,D.Q);G(s,o.r,t,o.rw,o.rw,D.R);G(s,o.sw,t+.024,.009,.009,D.S);
+ if(o.st)PL(s,o.st*(s.stK||1),t+.045,t+o.tc-.02,.012,o.stD);
+ if(o.ta)G(s,o.ta,t+o.tc,o.t1,o.t2,o.tD);
+ if(o.u)G(s,o.u,t+o.tc+.2,.045,.045,o.tD)}
+function pvc(s,t,d,w){w=w||1;EV(s,'V',t-.04,{v:'pvc',site:d===D.V?[112,205]:d===D.V2?[188,236]:[226,168]});G(s,1.3,t,.03*w,.045*w,d);G(s,.35,t+.09*w,.03,.03,neg(d));G(s,.5,t+.32,.07,.05,neg(d))}
+const P=(s,t)=>{G(s,.15,t,.022,.022,D.P);EV(s,'A',t-.05)};
+const seq=(s,arr,o)=>arr.forEach(t=>beat(s,t,o));
+function rep(per,fn){for(let o=0;o<DUR+.5;o+=per)fn(o)}
+let RRK=1;function reg(start,rr,fn,j){j=j===undefined?.02:j;rr*=RRK;let t=start;while(t<DUR+.4){fn(t);t+=rr*(1+rn(-j,j))}}
+function waves(s,list){for(let i=0;i<N;i++){const x=i/FS;list.forEach(w=>AV(s,i,w.a*(w.m?(.7+.3*Math.sin(2*Math.PI*w.m*x+w.p)):1)*Math.sin(2*Math.PI*w.f*x+w.p),w.d))}}
+
+const C=[
+{id:'nsr',n:'洞調律',cat:'rate',lead:'II',acc:['II'],sc:'「なんとなく胸が苦しい」と訴える50代。',
+ pts:['P波→QRSが1対1で続く','心拍数60〜100/分、RR間隔ほぼ一定','PR間隔0.12〜0.20秒（小さいマス3〜5個）'],
+ gen:s=>reg(.35,.83,t=>beat(s,t))},
+{id:'stach',n:'洞頻脈',cat:'rate',lead:'II',acc:['II'],sc:'気分不良を訴える30代。',
+ pts:['波形は洞調律と同じで、心拍数100/分超','原因（発熱・脱水・疼痛・出血・低酸素など）の評価が大切'],
+ gen:s=>reg(.3,.5,t=>beat(s,t,{pr:.14,tc:.21,t1:.04,t2:.03,ta:.28}))},
+{id:'sbrady',n:'洞徐脈',cat:'rate',lead:'II',acc:['II'],sc:'ふらつきを訴える70代。',
+ pts:['波形は洞調律と同じで、心拍数60/分未満','P波とQRSの関係は正常（1対1・PR一定）'],
+ gen:s=>reg(.5,1.4,t=>beat(s,t))},
+{id:'sss',sa:1,n:'洞不全症候群',cat:'rate',lead:'II',acc:['II'],sc:'最近ときどき目の前が暗くなるという80代。',
+ pts:['P波もQRSも出ない長い休止（洞停止・洞房ブロック）','この波形は洞停止の例','分類：Ⅰ型 洞徐脈／Ⅱ型 洞停止・洞房ブロック／Ⅲ型 徐脈頻脈症候群','長い休止で失神（アダムス・ストークス発作）を起こしうる'],
+ gen:s=>rep(7.55,o=>seq(s,[.4,1.25,2.1,5.4,6.25,7.1].map(t=>t+o)))},
+{id:'af',af:1,n:'心房細動',cat:'rate',lead:'II',acc:['II','CM1'],sc:'動悸と息切れを訴える70代。',
+ pts:['P波がなく、基線が細かく揺れる（f波）','RR間隔が完全に不規則（絶対性不整脈）','心内血栓による脳塞栓のリスク'],pw:'f波はⅡ誘導のほか、右心房に近いCM1（V1相当）でも見やすい。',
+ gen:s=>{let t=.3;while(t<DUR+.3){beat(s,t,{p:0});t+=rn(.38,1.05)}waves(s,[{a:.06,f:rn(5,5.6),p:rn(0,6),m:.7,d:D.F},{a:.04,f:rn(6.4,7),p:rn(0,6),d:D.F},{a:.025,f:rn(7.8,8.4),p:rn(0,6),d:[-.3,.6,.7]}])}},
+{id:'avb1',n:'1度房室ブロック',cat:'av',lead:'II',acc:['II'],sc:'健診で心電図の異常を指摘された60代。症状なし。',
+ pts:['PR間隔が0.20秒（大きいマス1個）を超えて延長','PRは毎拍一定で、QRSの脱落はない'],
+ gen:s=>reg(.45,.92,t=>beat(s,t,{pr:.32}),.01)},
+{id:'wen',n:'2度房室ブロック（ウェンケバッハ型）',cat:'av',lead:'II',acc:['II'],sc:'ふらつきを訴える60代。',
+ pts:['PR間隔が1拍ごとに徐々に延長','やがてP波の後のQRSが脱落し、これを繰り返す','多くは房室結節レベルのブロックで、比較的予後良好'],
+ gen:s=>{const pat=[.16,.28,.35,0];for(let k=0;k<43;k++){const pc=.2+k*.72,pr=pat[k%4];if(pr)beat(s,pc+pr-.01,{pr});else P(s,pc)}}},
+{id:'mob',n:'2度房室ブロック（モビッツⅡ型）',cat:'av',lead:'II',acc:['II'],sc:'失神して倒れたという70代。',
+ pts:['PR間隔は一定のまま、突然QRSが脱落','ヒス束以下のブロックが多く、3度房室ブロックへ移行しやすい','ペーシングの適応になりうる危険な徐脈'],
+ gen:s=>{const pat=[.18,.18,0];for(let k=0;k<40;k++){const pc=.2+k*.78,pr=pat[k%3];if(pr)beat(s,pc+pr-.01,{pr});else P(s,pc)}}},
+{id:'avb3',avd:1,n:'3度房室ブロック',cat:'av',lead:'II',acc:['II'],sc:'倦怠感と息切れを訴える80代。',
+ pts:['P波とQRSが無関係に出現（房室解離）','PP間隔・RR間隔はそれぞれほぼ一定','心室補充調律で高度な徐脈、QRS幅が広いことが多い'],
+ gen:s=>{const o=rn(0,.3);for(let t=.15+o;t<DUR+.3;t+=.66)P(s,t);for(let t=.6;t<DUR+.3;t+=1.65){EV(s,'V',t-.05,{v:'pvc',site:[140,238]});G(s,.9,t,.035,.045,D.V);G(s,.3,t+.1,.03,.03,neg(D.V));G(s,.35,t+.36,.08,.06,neg(D.V))}}},
+{id:'pace',pl:1,n:'ペーシング波形',cat:'av',lead:'II',acc:['II'],sc:'胸に手術の痕がある80代。気分不良を訴える。',
+ pts:['縦に細く鋭いペーシングスパイクの直後に幅広いQRS（心室ペーシング）','スパイクの後にQRSが続くか（キャプチャー）を確認','自己心拍を感知して抑制されているか（センシング）も確認'],
+ gen:s=>reg(.4,1.0,t=>{EV(s,'V',t-.03,{v:'pace'});s.sp.push({t:t-.03,a:1.6,d:D.SP});G(s,1.65,t+.02,.035,.045,D.PC);G(s,.6,t+.33,.07,.05,neg(D.PC))},0)},
+{id:'pvc',n:'心室期外収縮',cat:'pvc',lead:'II',acc:['II'],sc:'動悸を訴える50代。',
+ pts:['予定より早く、先行するP波のない幅広いQRS（0.12秒以上）','T波はQRSと逆向き','後に代償性休止（前後のRRの和が正常RRの2倍）'],
+ gen:s=>rep(7.65,o=>{seq(s,[.35,1.2,2.05,2.9,4.6,5.45,6.3,7.15].map(t=>t+o));pvc(s,3.4+o,D.V)})},
+{id:'pvcf',n:'多発性心室期外収縮',cat:'pvc',lead:'II',acc:['II'],sc:'動悸と胸の違和感を訴える60代。',
+ pts:['同じ形のPVCが頻発（ラウン分類2：1時間に30個以上）','この波形は正常拍とPVCが交互に出る「二段脈」','形が1種類＝発生源が1か所'],
+ gen:s=>{for(let t=.35;t<DUR+.3;t+=1.7){beat(s,t);pvc(s,t+.5,D.V)}}},
+{id:'pvcm',n:'多源性心室期外収縮',cat:'pvc',lead:'II',acc:['II'],sc:'胸苦しさを訴える70代。',
+ pts:['形の異なるPVCが混在（ラウン分類3）','発生源が複数あることを示し、単源性より危険度が高い'],
+ gen:s=>rep(7.65,o=>{seq(s,[.35,1.2,2.9,3.75,5.45,6.3].map(t=>t+o));pvc(s,1.7+o,D.V,1);pvc(s,4.25+o,D.V2,1.25);pvc(s,6.8+o,D.LB,.75)})},
+{id:'ront',n:'R on T型心室期外収縮',cat:'pvc',lead:'II',acc:['II'],sc:'胸苦しさで搬送中の60代。',
+ pts:['PVCが直前の拍のT波の頂上付近に重なる','ラウン分類5（最も危険）','心室頻拍・心室細動の引き金になりうる'],
+ gen:s=>rep(7.65,o=>{seq(s,[.35,1.2,2.05,2.9,4.6,5.45,6.3,7.15].map(t=>t+o));pvc(s,3.16+o,D.V)})},
+{id:'pac',n:'上室期外収縮',cat:'pvc',lead:'II',acc:['II','CM1'],sc:'動悸を訴える40代。',
+ pts:['予定より早く、形の異なるP波が出現','QRSは通常幅が狭く、正常拍と同じ形','後の休止は代償性にならない（非代償性休止）'],pw:'P波の形の違いはⅡ誘導やCM1（V1相当）で見やすい。',
+ gen:s=>rep(7.3,o=>{seq(s,[.35,1.2,2.05,3.4,4.25,5.1,5.95,6.8].map(t=>t+o));beat(s,2.55+o,{p:.1,pD:neg(D.P),pr:.14})})},
+{id:'vt',n:'心室頻拍',cat:'lethal',lead:'II',acc:['II','CM1'],sc:'胸苦しさを訴えたあと、顔色が悪くなってきた60代。',
+ pts:['幅広いQRSが規則的に連続（3連発以上・100/分以上）','P波は見えない、またはQRSと無関係','まず脈の有無を確認。脈なしなら除細動の対象'],pw:'緊急時は貼り替えに時間をかけない。Ⅱ誘導で十分。QRSの形の鑑別にはCM1も有用。',
+ gen:s=>{for(let t=.2;t<DUR+.3;t+=.34){EV(s,'V',t-.05,{v:'pvc',site:[112,205]});G(s,1.4,t,.045,.05,D.V);G(s,.9,t+.15,.05,.06,neg(D.V))}}},
+{id:'vf',vf:1,n:'心室細動',cat:'lethal',lead:'II',acc:['II'],sc:'目の前で倒れた50代。',
+ pts:['QRS・T波が判別できない不規則な波のみ','心臓はけいれん状態で、有効な拍出はない（心停止）','直ちにCPRと電気ショック'],pw:'貼り替えより先にCPR・除細動。誘導選びに時間をかけない。',
+ gen:s=>waves(s,[{a:.6,f:rn(4,4.6),p:rn(0,6),m:.28,d:[.5,.8,-.2]},{a:.4,f:rn(5.3,6),p:rn(0,6),m:.21,d:[-.3,.7,.6]},{a:.25,f:rn(6.6,7.4),p:rn(0,6),m:.33,d:[.8,.2,.5]}])},
+{id:'qt',n:'QT延長症候群',cat:'cond',lead:'II',acc:['II'],sc:'失神歴がある70代。複数の薬を内服中。',
+ pts:['QRSの始まりからT波の終わりまで（QT）が長い','目安：QTがRR間隔の半分を超える','トルサード・ド・ポアンツ（多形性VT）の危険','原因：薬剤、低K・低Mg血症、先天性など'],
+ gen:s=>reg(.4,1.05,t=>beat(s,t,{tc:.44,t1:.085,t2:.06,ta:.28}),.01)},
+{id:'lbbb',blk:'L',n:'左脚ブロック',cat:'cond',lead:'CM1',acc:['CM1'],sc:'胸部不快を訴える70代。',
+ pts:['QRS幅0.12秒以上','V1（CM1）で深く幅広い下向きのQRS（QS型・rS型）','V6（CM6）では幅広い上向きのR','ST-TはQRSと逆向き。新たな左脚ブロック＋胸痛は心筋梗塞に注意'],pw:'脚ブロックの左右はV1相当のCM1で見分ける。CM6と見比べるとさらに分かりやすい。',
+ gen:s=>reg(.35,.85,t=>{EV(s,'A',t-.22);EV(s,'V',t-.04,{v:'lb'});G(s,.15,t-.17,.022,.022,D.P);G(s,1.9,t+.03,.03,.04,D.LB);PL(s,.28,t+.1,t+.24,.015,neg(D.LB));G(s,.7,t+.3,.06,.045,neg(D.LB))},.01)},
+{id:'rbbb',blk:'R',n:'右脚ブロック',cat:'cond',lead:'CM1',acc:['CM1'],sc:'健診で心電図の異常を指摘された50代。',
+ pts:['QRS幅0.12秒以上（0.10〜0.12秒は不完全右脚ブロック）','V1（CM1）でrsR’型（M字・ウサギの耳）','V6（CM6）では幅広いS波','V1のT波は陰性になりやすい'],pw:'脚ブロックの左右はV1相当のCM1で見分ける。CM6と見比べるとさらに分かりやすい。',
+ gen:s=>reg(.35,.85,t=>{EV(s,'A',t-.22);EV(s,'V',t-.05,{v:'rb'});G(s,.15,t-.17,.022,.022,D.P);G(s,.14,t-.045,.011,.011,D.Q);G(s,1.1,t-.005,.012,.012,D.R);G(s,1.1,t+.05,.018,.024,D.RB);G(s,.37,t+.3,.06,.05,neg(D.RB));G(s,.2,t+.28,.05,.035,D.T)},.01)},
+{id:'wpw',ap:1,n:'WPW症候群',cat:'cond',lead:'II',acc:['II'],sc:'動悸発作を繰り返すという20代。今は症状なし。',
+ pts:['PR間隔の短縮（0.12秒未満）','QRSの立ち上がりがなだらか（デルタ波）','QRS幅の拡大。副伝導路（ケント束）が原因','発作性上室頻拍や、心房細動合併時の偽性心室頻拍に注意'],
+ gen:s=>reg(.35,.85,t=>{EV(s,'A',t-.18);EV(s,'V',t-.09,{v:'wpw'});G(s,.15,t-.13,.022,.022,D.P);G(s,.3,t-.03,.028,.012,D.R);G(s,1.0,t,.012,.012,D.R);G(s,.15,t+.03,.01,.01,D.S);G(s,.15,t+.29,.06,.04,D.T)},.01)},
+{id:'hat',zone:'ant',cor:['LAD','occ'],n:'T波増高（超急性期T波）',cat:'st',lead:'CM3',acc:['CM2','CM3','CM4'],dx:['hyk','ste','cort','stei'],sc:'30分前からの胸苦しさを訴える50代。',
+ pts:['急性心筋梗塞のごく初期に出る、幅が広く大きいT波','この後ST上昇へ進行することがある','高K血症のテント状T波（幅が狭く尖る）との違いは「裾野の広さ」'],pw:'前壁の変化はCM2〜CM4（V2〜V4相当）で見る。',
+ gen:s=>reg(.35,.8,t=>beat(s,t,{st:.07,ta:.62,tD:D.ANT,tc:.28,t1:.075,t2:.065}),.01)},
+{id:'ste',zone:'ant',cor:['LAD','occ'],n:'ST上昇（前壁）',cat:'st',lead:'CM4',acc:['CM2','CM3','CM4'],sc:'冷汗を伴う胸苦しさの60代。',
+ pts:['QRSの終わり（J点）以降のSTが基線より上昇','12誘導ではV1〜V4で上昇＝前壁中隔〜前壁','責任冠動脈：LAD（左前下行枝）','隣り合う2誘導以上で連続→急性心筋梗塞（STEMI）を疑う'],pw:'前壁の梗塞はCM2〜CM4（V2〜V4相当）で見る。前壁の担当はLAD（左前下行枝）。',
+ gen:s=>reg(.35,.8,t=>beat(s,t,{st:.2,ta:.3,tD:D.ANT,tc:.27,t1:.07,t2:.045}),.01)},
+{id:'stei',zone:'inf',cor:['RCA','mid'],n:'ST上昇（下壁）',cat:'st',lead:'II',acc:['II'],sc:'嘔気と冷汗を訴える70代。',
+ pts:['Ⅱ・Ⅲ・aVFでST上昇（ⅢがⅡより高いとRCAらしい）','Ⅰ・aVLに鏡面像のST低下','責任冠動脈：RCA（右冠動脈）が多く、LCXのことも','徐脈・房室ブロック、右室梗塞の合併に注意'],pw:'下壁はⅡ誘導（標準貼り）で見える。',
+ gen:s=>reg(.35,.85,t=>beat(s,t,{st:.36,stD:D.INF,ta:.3,tD:D.INF,tc:.27,t1:.07,t2:.045}),.01)},
+{id:'stel',zone:'lat',cor:['LCX','occ'],n:'ST上昇（側壁）',cat:'st',lead:'CM5',acc:['CM5','CM6'],sc:'胸から左肩にかけての重苦しさを訴える60代。',
+ pts:['Ⅰ・aVL・V5・V6でST上昇','Ⅲ・aVFに鏡面像のST低下','責任冠動脈：LCX（左回旋枝）、LADの対角枝'],pw:'側壁はCM5・CM6（V5・V6相当）で見る。',
+ gen:s=>reg(.35,.8,t=>beat(s,t,{st:.25,stD:D.LATH,ta:.3,tD:D.T,tc:.27,t1:.07,t2:.045}),.01)},
+{id:'asys',cat:'lethal',n:'心静止',lead:'II',acc:['II'],sc:'自宅で倒れているのを発見された60代。',
+ pts:['P波もQRSもない、ほぼ平坦な波形','電極外れや感度（ゲイン）の設定ミスでないか確認し、2つ以上の誘導で確認','電気ショックの適応はない。直ちにCPR'],pw:'誘導を変えて（2誘導以上で）平坦であることを確認する。',
+ gen:s=>{}},
+{id:'pea',nocon:1,cat:'lethal',n:'PEA（無脈性電気活動）',lead:'II',acc:['II'],sc:'交通事故で受傷した30代。急に反応がなくなった。',
+ pts:['心電図には規則的な波形が出ているのに、脈が触れない','心電図ではなく「脈・反応」で判断する','電気ショックの適応はない。直ちにCPRと原因検索（低酸素・出血・緊張性気胸など）'],
+ gen:s=>reg(.5,1.25,t=>beat(s,t,{rw:.02,tc:.32,ta:.25}),.02)},
+{id:'tdp',tdpT:2.4,cat:'lethal',n:'トルサード・ド・ポアンツ',lead:'II',acc:['II'],sc:'自宅で突然倒れた70代。',
+ pts:['QRSの向きと大きさが、ねじれるように周期的に変わる多形性心室頻拍','背景にQT延長があることが多い（低K・低Mg、薬剤など）','脈がなければVFと同様にCPR＋電気ショック'],
+ gen:s=>{s.tdp=2.4;beat(s,.4,{tc:.44,t1:.085,t2:.06,ta:.28});beat(s,1.45,{tc:.44,t1:.085,t2:.06,ta:.28});
+  const A=nz([.5,.8,-.2]),B=nz([-.3,.2,.9]),f=4.3,i0=Math.floor(2.35*FS);
+  for(let i=i0;i<N;i++){const t=i/FS,ramp=Math.min(1,(t-2.35)/.25),env=ramp*(.75+.45*Math.sin(2*Math.PI*.42*t)),w=2*Math.PI*.21*t,v=1.1*env*Math.sin(2*Math.PI*f*(t-2.35));AV(s,i,v*Math.cos(w),A);AV(s,i,v*Math.sin(w),B)}
+  for(let t=2.4;t<DUR;t+=1/f){s.qrs.push(t);s.ev.push({k:'V',t,v:'pvc',site:[112,205]})}}},
+{id:'afl',cat:'rate',n:'心房粗動',lead:'II',acc:['II','CM1'],sc:'動悸を訴える60代。',
+ pts:['のこぎりの歯のような規則正しい粗動波（F波・約300/分）','F波2〜4個に1回QRSが出る（この波形は4:1伝導）','Ⅱ・Ⅲ・aVFやV1（CM1）で見やすい'],pw:'F波はⅡ誘導やCM1（V1相当）で見やすい。',
+ gen:s=>{const o=rn(0,1);for(let t=.3;t<DUR+.3;t+=.8)beat(s,t,{p:0});
+  for(let i=0;i<N;i++){const ph=((i/FS)*5+o)%1,v=ph<.22?-ph/.22:-1+(ph-.22)/.78;AV(s,i,.2*(v+.5),D.P)}
+  for(let t=(1-o)/5;t<DUR;t+=.2)s.ev.push({k:'A',t,ec:true,s2:[96,86],s3:[-36,-30,34]})}},
+{id:'psvt',svt:1,cat:'rate',n:'発作性上室頻拍（PSVT）',lead:'II',acc:['II'],sc:'突然の動悸を訴える20代。',
+ pts:['幅の狭いQRSが規則正しく150〜250/分で続く','P波は見えないか、QRSの直後に隠れる','突然始まり突然止まる。房室結節などを回る電気の旋回（リエントリー）が原因'],
+ gen:s=>reg(.2,.33,t=>beat(s,t,{p:0,tc:.2,t1:.035,t2:.03,ta:.25}),0)},
+{id:'post',zone:'post',cor:['LCX','occ'],cat:'st',n:'後壁梗塞',lead:'CM2',acc:['CM1','CM2','CM3'],sc:'胸苦しさを訴える60代。',
+ pts:['後壁は前からは直接見えないので「ミラーイメージ（鏡像）」で判断する','V1〜V3（CM1〜CM3）でST低下＋R波の増高＝後壁のST上昇・異常Q波を前から裏返しに見ている','責任冠動脈：LCX（左回旋枝）が多く、RCAのことも','前壁の単なる「ST低下（虚血）」と見誤りやすい。胸痛＋V1〜V3の水平なST低下・高いR波は後壁梗塞を疑う'],pw:'3点モニターではCM1〜CM3（V1〜V3相当）で、ST低下とR波の増高（ミラーイメージ）として見る。',
+ gen:s=>reg(.35,.85,t=>{beat(s,t,{st:.16,stD:D.POST,ta:.3,tD:D.T});G(s,.3,t+.005,.013,.013,D.ANTR);G(s,.15,t+.27,.06,.045,D.ANTR)},.01)},
+{id:'rvmi',zone:'rv',cor:['RCA','prox'],cat:'st',n:'右室梗塞',lead:'CM4R',acc:['CM4R'],sc:'胸苦しさと気分不良を訴える70代。血圧が低い。',
+ pts:['下壁梗塞（Ⅱ・Ⅲ・aVFのST上昇、ⅢがⅡより高い）に右室梗塞を合併','右側胸部（V4Rの位置）でST上昇。標準12誘導ではV1のST上昇が手がかり','責任冠動脈：RCA（右冠動脈）の近位部','血圧が下がりやすい。ニトログリセリンなど血管拡張薬で血圧低下しやすいので注意'],pw:'右室はV4R（右第5肋間鎖骨中線）で見る。3点モニターでは緑をV4Rの位置へ（CM4R）。',
+ gen:s=>reg(.35,.85,t=>{beat(s,t,{st:.25,stD:D.INF,ta:.3,tD:D.INF,tc:.27,t1:.07,t2:.045});PL(s,.15,t+.045,t+.25,.012,D.RVI)},.01)},
+{id:'art_mov',cat:'art',n:'アーチファクト（体動）',lead:'II',acc:['II'],sc:'搬送中、ストレッチャー上で体を動かしている50代。会話はできている。',
+ pts:['体動・搬送中の揺れ・電極の引っ張りで、VFやVTのような大きな揺れが出る','よく見ると、揺れの中にも規則正しいQRSが続いている','波形だけで判断せず、意識・呼吸・脈を確認'],
+ gen:s=>{reg(.35,.82,t=>beat(s,t));s.ar=new Float64Array(N);const B=[[3.5,8],[10.5,12.8]],fs=[[rn(1.5,2.5),rn(0,6)],[rn(3.5,5),rn(0,6)],[rn(6,7.5),rn(0,6)]];
+  for(let i=0;i<N;i++){const t=i/FS;let e=0;B.forEach(b=>{if(t>b[0]&&t<b[1])e=Math.max(e,Math.sin(Math.PI*(t-b[0])/(b[1]-b[0])))});if(e>0)s.ar[i]=e*(.7*Math.sin(2*Math.PI*fs[0][0]*t+fs[0][1])+.45*Math.sin(2*Math.PI*fs[1][0]*t+fs[1][1])+.25*Math.sin(2*Math.PI*fs[2][0]*t+fs[2][1]))}}},
+{id:'art_off',lo:1,cat:'art',n:'電極外れ（心静止に見える）',lead:'II',acc:['II'],sc:'会話しながら搬送中の60代。',
+ pts:['途中から突然まっすぐな線（フラット）になる','「心静止」と間違えやすい。モニターには「電極外れ」などの表示が出ることが多い','電極・ケーブルを確認し、患者の反応・脈を確認する'],
+ gen:s=>{reg(.35,.82,t=>beat(s,t));const i0=6*FS;for(let i=i0;i<N;i++){s.x[i]=0;s.y[i]=0;s.z[i]=0}s.ar=new Float64Array(N);for(let i=i0;i<Math.min(N,i0+FS);i++){const t=(i-i0)/FS;s.ar[i]=1.6*Math.exp(-t/.08)}s.flat=6}},
+{id:'art_hum',cat:'art',n:'交流障害（ハム）',lead:'II',acc:['II'],sc:'自宅のベッドで休んでいる70代。意識清明。',
+ pts:['基線が細かく規則正しく揺れ、太い帯のように見える','電源（交流：西日本60Hz・東日本50Hz）からの電気的なノイズ','電極の貼り直し、ケーブルを電源コードから離すなどで改善'],
+ gen:s=>{reg(.35,.82,t=>beat(s,t));s.ar=new Float64Array(N);for(let i=0;i<N;i++)s.ar[i]=.12*Math.sin(2*Math.PI*60*i/FS)}},
+{id:'art_emg',cat:'art',n:'筋電図の混入（ふるえ）',lead:'II',acc:['II'],sc:'寒い屋外で救助された40代。意識清明。',
+ pts:['基線に不規則で細かいギザギザが乗る','寒さによるふるえ・緊張・けいれんなど、筋肉の電気活動が混入','心房細動のf波やVFと間違えないよう、QRSの規則性と患者の状態を確認'],
+ gen:s=>{reg(.35,.82,t=>beat(s,t));s.ar=new Float64Array(N);let b=0;for(let i=0;i<N;i++){const t=i/FS,e=.6+.4*Math.sin(2*Math.PI*.7*t);b=.55*b+(Math.random()-.5);s.ar[i]=.09*e*b}}},
+{id:'extant',zone:'extant',cor:['LAD','prox'],cat:'st',n:'広範前壁梗塞',lead:'CM3',acc:['CM2','CM3','CM4','CM5'],sc:'冷汗を伴う強い胸苦しさの60代。',
+ pts:['V1〜V6とⅠ・aVLの広い範囲でST上昇','責任冠動脈：LADの近位部（対角枝より手前）','梗塞範囲が広く、心原性ショック・致死性不整脈に注意'],pw:'3点モニターではCM2〜CM5のどこでもST上昇が見える。',
+ gen:s=>reg(.35,.75,t=>beat(s,t,{st:.18,stD:D.EXT,ta:.3,tD:D.EXT,tc:.27,t1:.07,t2:.045}),.01)},
+{id:'hlat',zone:'hlat',cor:['DG','occ'],cat:'st',n:'高位側壁梗塞',lead:'CM5',acc:['CM5','CM6'],sc:'左肩の痛みと胸部不快を訴える50代。',
+ pts:['Ⅰ・aVLでST上昇、Ⅲ・aVFに鏡像のST低下','V2にもST上昇が出ることがある（V3〜V4は変化が乏しいことも）','責任冠動脈：対角枝（D1）、またはLCxの鈍縁枝','変化が小さく見逃しやすい。ⅢのST低下が手がかり'],pw:'3点モニターではCM5・CM6（V5・V6相当）で見る。標準貼りのまま設定をⅠにするとⅠ誘導としても見える。',
+ gen:s=>reg(.35,.85,t=>beat(s,t,{st:.2,stD:D.HL,tc:.27,t1:.07,t2:.045}),.01)},
+{id:'apex',zone:'apex',cor:['LAD','dist'],cat:'st',n:'心尖部梗塞',lead:'CM4',acc:['CM4','CM5','II'],sc:'胸苦しさを訴える70代。',
+ pts:['V3〜V6に加えてⅡ・Ⅲ・aVFでもST上昇','LADが心尖を回り込んで下壁まで栄養している（wrap-around LAD）ため','責任冠動脈：LADの遠位部','下壁梗塞と前壁梗塞の合併と間違えやすい'],pw:'3点モニターではCM4・CM5、または標準貼り（Ⅱ）でST上昇が見える。',
+ gen:s=>reg(.35,.8,t=>beat(s,t,{st:.17,stD:D.APEX,ta:.3,tD:D.APEX,tc:.27,t1:.07,t2:.045}),.01)},
+{id:'infpost',zone:'infpost',cor:['RCA','dist'],cat:'st',n:'下後壁梗塞',lead:'II',acc:['II','CM1','CM2'],sc:'嘔気と冷汗を伴う胸苦しさの60代。',
+ pts:['Ⅱ・Ⅲ・aVFでST上昇（下壁）','V1〜V3でST低下＋R波増高（後壁のミラーイメージ）','責任冠動脈：RCAの遠位部（後下行枝の手前）、またはLCx','徐脈・房室ブロックの合併に注意'],pw:'標準貼り（Ⅱ）で下壁を、CM1〜CM3で後壁のミラーイメージを確認する。',
+ gen:s=>reg(.35,.9,t=>{beat(s,t,{st:.3,stD:D.INF,ta:.3,tD:D.INF,tc:.27,t1:.07,t2:.045});PL(s,.16,t+.045,t+.25,.012,D.POST);G(s,.25,t+.005,.013,.013,D.ANTR)},.01)},
+{id:'lmt',zone:'lmt',cor:['LMT','occ'],cat:'st',n:'LMT閉塞（左冠動脈主幹部）',lead:'CM5',acc:['aVR','CM5','CM4'],sc:'胸苦しさを訴えたあと、急に血圧が下がってきた60代。',
+ pts:['aVRでST上昇（V1も上昇することがある）','それ以外の広い範囲（Ⅰ・Ⅱ・V4〜V6など）でST低下','左冠動脈全体（LADとLCx）の血流が途絶え、心原性ショック・突然死の危険が非常に高い','aVRのST上昇＋広範なST低下は、LMTや多枝病変を疑うサイン'],pw:'3点モニターでは赤と緑を入れ替えてaVR相当（赤＝左下腹部・緑＝右鎖骨下）にするか、CM5で広いST低下を確認する。',
+ gen:s=>reg(.3,.62,t=>beat(s,t,{st:.18,stD:D.LMTI,pr:.15,tc:.24,t1:.05,t2:.035,ta:.25}),.01)},
+{id:'q_dissect',cat:'mimic',n:'大動脈解離（冠動脈への波及）',lead:'II',acc:['II'],dx:['stei','ste','q_peri'],sc:'突然の胸の激痛が背中へ移っていった60代。左右の腕で血圧が違う。',
+ pts:['解離が右冠動脈の入口に及ぶと、下壁梗塞と同じST上昇が出ることがある','「移動する胸背部痛」「血圧の左右差」は大動脈解離を疑う手がかり','心電図だけで心筋梗塞と決めつけない（抗血栓療法が命取りになりうる）'],
+ gen:s=>reg(.3,60/rn(95,115),t=>beat(s,t,{st:.25,stD:D.INF,ta:.3,tD:D.INF,tc:.25,t1:.06,t2:.04}),.01)},
+{id:'q_myoc',cat:'mimic',n:'急性心筋炎',lead:'II',acc:['II','CM4','CM5'],dx:['q_peri','extant','stach'],sc:'1週間前に発熱と咳があった30代。今朝から胸苦しさと強いだるさを訴える。',
+ pts:['特定の冠動脈の支配域に一致しない、広い範囲のST上昇','頻脈、QRSの低電位（波が小さい）、期外収縮や房室ブロックを伴うことも','かぜ症状が先行することが多い。急に重症化（劇症型）して致死性不整脈やショックになることがある'],
+ gen:s=>{const rr=60/rn(105,125);let n=0;reg(.3,rr,t=>{n++;if(n%7===4)pvc(s,t-rr*.4,D.V);else beat(s,t,{q:.06,r:.6,sw:.15,st:.14,stD:[.45,.55,.7],ta:.22,tc:.22,t1:.045,t2:.035})},.01)}},
+{id:'q_peri',cat:'mimic',n:'急性心膜炎',lead:'II',acc:['II','CM5','CM4'],dx:['q_myoc','ste','stei'],sc:'数日前から胸痛が続く20代。深呼吸で痛みが強くなり、前かがみになると楽になる。',
+ pts:['ほぼ全部の誘導で、下に凸（凹型）のST上昇','PR部分の低下（aVRでは逆にSTが低下しPRが上昇）','鏡像のST低下がない（aVR・V1を除く）のが心筋梗塞との違い','前かがみで楽になる・深呼吸で増悪する胸痛が特徴'],
+ gen:s=>reg(.3,60/rn(90,110),t=>{beat(s,t,{st:.15,stD:[.45,.55,.7],ta:.32,tD:[.45,.55,.7],tc:.24,t1:.06,t2:.04});PL(s,-.06,t-.09,t-.04,.01,D.P)},.01)},
+{id:'q_tako',cat:'mimic',n:'たこつぼ心筋症',lead:'CM3',acc:['CM2','CM3','CM4'],dx:['ste','hat','extant'],sc:'親族の葬儀の直後から胸苦しさを訴える70代女性。',
+ pts:['前壁の心筋梗塞とよく似たST上昇（数日後に深い陰性T波・QT延長）','強い精神的・身体的ストレスの後、高齢女性に多い','冠動脈に閉塞がないのに、左室の心尖部が動かなくなる（たこつぼ型）','心電図だけでは心筋梗塞と区別できない。STEMIとして扱う'],
+ gen:s=>reg(.35,60/rn(80,100),t=>beat(s,t,{st:.18,stD:[.3,.3,.9],ta:.25,tD:[.3,.3,.9],tc:.32,t1:.08,t2:.05}),.01)},
+{id:'q_pe',cat:'lung',n:'肺血栓塞栓症',lead:'CM1',acc:['CM1','II'],dx:['stach','rbbb','q_tako'],sc:'長時間の飛行機移動のあとから息苦しさを訴える50代。',
+ pts:['洞頻脈が最も多い所見（頻脈だけのことも多い）','SⅠQⅢTⅢ（Ⅰの深いS波、ⅢのQ波と陰性T波）','V1〜V3（CM1〜CM3）の陰性T波、右脚ブロック（右心負荷）','右軸偏位、肺性P波（Ⅱで尖った高いP波）','心電図が正常に近いことも多い。症状・経過・SpO2低下で疑う（表示される所見は毎回変わります）'],
+ gen:s=>reg(.3,60/rn(105,125),t=>{beat(s,t,{ta:.18,tc:.22,t1:.045,t2:.035});G(s,.15,t-.025,.008,.008,[.5,-.85,0]);G(s,.3,t+.03,.012,.012,[-1,.15,0]);G(s,.3,t+.045,.014,.018,D.RB);G(s,-.25,t+.23,.05,.04,[-.3,.6,.8])},.01)},
+{id:'q_brugada',cat:'mimic',n:'ブルガダ症候群',lead:'CM1',acc:['CM1','CM2'],dx:['rbbb','ste','hat'],sc:'夜間、就寝中にうなり声をあげて一時的に反応がなくなったという30代男性。今は意識清明。',
+ pts:['V1〜V2（CM1〜CM2）で弓状（coved型）のST上昇と陰性T波','Ⅱ誘導ではほとんど変化がない','若〜中年男性の夜間の失神・突然死の原因（心室細動を起こす）','右脚ブロックに似た形に見えることがある'],
+ gen:s=>reg(.35,60/rn(60,80),t=>{beat(s,t,{ta:.25});G(s,.45,t+.045,.012,.075,D.ANTR);G(s,-.3,t+.27,.05,.05,D.ANTR)},.01)},
+{id:'q_sah',cat:'mimic',n:'くも膜下出血（脳性T波）',lead:'II',acc:['II','CM3','CM4'],dx:['cort','qt','q_tako'],sc:'突然の激しい頭痛のあと嘔吐し、意識がもうろうとしている50代。',
+ pts:['幅の広い巨大な陰性T波（脳性T波）とQT延長','冠動脈の病気と間違えやすい','くも膜下出血・脳出血などの頭蓋内の病気で出ることがある（自律神経の影響）'],
+ gen:s=>reg(.4,60/rn(50,65),t=>beat(s,t,{ta:-.6,tD:[.45,.55,.6],tc:.42,t1:.1,t2:.09}),.01)},
+{id:'q_digi',cat:'mimic',n:'ジギタリス効果・中毒',lead:'CM5',acc:['CM5','CM4','II'],dx:['std','hypk','cort'],sc:'心不全で長年治療中の80代。食欲がなく、嘔気がある。',
+ pts:['盆状（スプーン状）のST低下（ゆるやかに下がって戻る）','QTの短縮。中毒では徐脈・房室ブロック・期外収縮などさまざまな不整脈が出る','食欲低下・嘔気・視覚異常（黄色く見える）は中毒を疑う手がかり'],
+ gen:s=>reg(.4,60/rn(50,62),t=>{beat(s,t,{pr:.22,ta:.1,tc:.22});G(s,-.2,t+.15,.06,.07,D.LAT)},.01)},
+{id:'std',zone:'sub',cor:['LAD','sten'],n:'ST低下',cat:'st',lead:'CM5',acc:['CM5','CM4'],sc:'階段を上ったあとに胸が苦しくなったという60代。今は少し楽になっている。',
+ pts:['J点以降のSTが基線より低下','水平型・下降型のST低下は心筋虚血を示唆（労作性狭心症など）','ST上昇の鏡面像として出ることもある'],pw:'CM5（V5相当）は虚血の検出感度が最も高い。',
+ gen:s=>reg(.35,.8,t=>beat(s,t,{st:-.11,stD:D.LAT,tc:.3,ta:.07}),.01)},
+{id:'cort',zone:'ant',cor:['LAD','old'],n:'冠性T波',cat:'st',lead:'CM4',acc:['CM2','CM3','CM4'],sc:'数日前から胸の違和感が続いていたという60代。',
+ pts:['左右対称で深い陰性T波','心筋梗塞の発症後（亜急性期以降）などに出現','異常Q波を伴うことがある'],pw:'前壁の変化はCM2〜CM4（V2〜V4相当）で見る。',
+ gen:s=>reg(.35,.85,t=>beat(s,t,{ta:-.34,tD:D.ANT,tc:.3,t1:.05,t2:.05}),.01)},
+{id:'hyk',n:'高カリウム血症に伴うT波増高',cat:'el',lead:'II',acc:['II','CM2','CM3','CM4'],dx:['hat','hypk','ste'],sc:'脱力感を訴える透析患者。',
+ pts:['幅が狭く、左右対称に尖ったT波（テント状T波）','進行するとP波の平低化→QRS幅の拡大','さらに進むとサインカーブ様→心室細動・心停止の危険'],pw:'Ⅱ誘導でも胸部誘導（CM2〜CM4）でも確認できる。',
+ gen:s=>reg(.35,.85,t=>beat(s,t,{p:.08,rw:.014,ta:1.0,tc:.24,t1:.03,t2:.028}),.01)},
+{id:'hypk',n:'低カリウム血症に伴うU波',cat:'el',lead:'II',acc:['II','CM2','CM3'],sc:'数日前から嘔吐・下痢が続き、だるさを訴える40代。',
+ pts:['T波の平低化','T波の後に目立つU波','軽いST低下。T波とU波が融合するとQT延長に見える'],pw:'Ⅱ誘導で確認できる。U波はV2〜V3相当（CM2・CM3）で特に見やすい。',
+ gen:s=>reg(.4,.95,t=>beat(s,t,{ta:.08,tc:.24,st:-.06,stD:D.T,u:.22}),.01)},
+{id:'osb',n:'オズボーン波（J波）',cat:'el',lead:'II',acc:['II'],sc:'冬の屋外で倒れていた80代。',
+ pts:['QRSの終わり（J点）に出る、こぶ状の上向きの波','低体温症で出現し、体温が低いほど目立つ','徐脈を伴いやすい'],
+ gen:s=>reg(.5,1.35,t=>{beat(s,t,{tc:.33,t1:.06,t2:.045});G(s,.4,t+.05,.015,.03,D.R)},.01)}
+];
+
+/* ---- 同じ診断名でも毎回違う波形（バリエーション） ---- */
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function sinusTimes(start,rr,j){const T=[];let t=start;while(t<DUR+.5){T.push(t);t+=rr*(1+rn(-(j||.02),j||.02))}return T}
+function ectopicRun(s,rr,opt){/* opt.idx:置き換える拍のindex集合, opt.make(s,tPrev,k) が期外収縮を置いてその時刻を返す */
+ const T=sinusTimes(rn(.25,.6),rr,.015),skip=new Set();
+ opt.idx.forEach(i=>{if(i<1||i>=T.length)return;skip.add(i);if(opt.skip2)skip.add(i+1);opt.make(s,T[i-1],i)});
+ T.forEach((t,i)=>{if(!skip.has(i))beat(s,t,opt.o)})}
+const PVCD=()=>pick([D.V,D.V2,D.LB,[.6,.3,.7],[-.6,.5,.5]]);
+const VG={
+ nsr:s=>{const rr=60/rn(60,95),pr=rn(.13,.19),ta=rn(.22,.36);reg(rn(.2,.6),rr,t=>beat(s,t,{pr,ta}))},
+ stach:s=>{const hr=rn(105,150),rr=60/hr,pr=rn(.12,.15);reg(.25,rr,t=>beat(s,t,{pr,tc:Math.max(.19,.21-(150-hr)*0),t1:.04,t2:.03,ta:.28}))},
+ sbrady:s=>reg(rn(.3,.8),60/rn(38,55),t=>beat(s,t)),
+ sss:s=>{const ty=pick(['arrest','sab','bt']);
+  if(ty==='bt'){let t=.2;while(t<5.2){beat(s,t,{p:0});t+=rn(.35,.6)}for(let i=0;i<Math.floor(5.3*FS);i++)AV(s,i,.04*Math.sin(2*Math.PI*6.1*i/FS)+.03*Math.sin(2*Math.PI*7.7*i/FS+1),D.F);t+=rn(2.6,3.6);while(t<DUR+.4){beat(s,t);t+=60/rn(42,52)}return}
+  const rr=60/rn(62,78);let t=rn(.3,.6),n=0;const at=Math.floor(rn(2,4));
+  while(t<DUR+.4){beat(s,t);n++;if(n%at===0){t+=ty==='sab'?rr*2:rn(2.4,3.8)}else t+=rr*(1+rn(-.02,.02))}},
+ af:s=>{const r=pick([[.35,.6],[.5,1.05],[.85,1.5]]),a=pick([.03,.06,.09]);let t=.3;while(t<DUR+.3){beat(s,t,{p:0});t+=rn(r[0],r[1])}
+  waves(s,[{a,f:rn(5,5.6),p:rn(0,6),m:.7,d:D.F},{a:a*.7,f:rn(6.4,7),p:rn(0,6),d:D.F},{a:a*.4,f:rn(7.8,8.4),p:rn(0,6),d:[-.3,.6,.7]}])},
+ avb1:s=>{const pr=rn(.24,.4);reg(.45,60/rn(55,85),t=>beat(s,t,{pr}),.01)},
+ wen:s=>{const n=pick([3,4,5]),pp=60/rn(70,90),PR=[];for(let k=0;k<n-1;k++)PR.push(.16+.2*(1-Math.pow(.5,k)));PR.push(0);
+  for(let k=0,pc=rn(.15,.4);pc<DUR+.3;k++,pc+=pp){const pr=PR[k%n];if(pr)beat(s,pc+pr-.01,{pr});else P(s,pc)}},
+ mob:s=>{const n=pick([3,4]),pp=60/rn(65,85),pr0=rn(.16,.2);for(let k=0,pc=rn(.15,.4);pc<DUR+.3;k++,pc+=pp){if(k%n===n-1)P(s,pc);else beat(s,pc+pr0-.01,{pr:pr0})}},
+ avb3:s=>{const pp=60/rn(70,100),rr=60/rn(30,45),wide=Math.random()<.6;for(let t=rn(.1,.5);t<DUR+.3;t+=pp)P(s,t);
+  for(let t=rn(.4,1);t<DUR+.3;t+=rr){if(wide){EV(s,'V',t-.05,{v:'pvc',site:[140,238]});G(s,.9,t,.035,.045,D.V);G(s,.3,t+.1,.03,.03,neg(D.V));G(s,.35,t+.36,.08,.06,neg(D.V))}else beat(s,t,{p:0})}},
+ pace:s=>{const ddd=Math.random()<.5,rr=60/rn(60,75);
+  reg(.4,rr,t=>{if(ddd){const ta=t-.18;s.sp.push({t:ta-.02,a:1.2,d:D.SP});G(s,.12,ta+.04,.025,.025,D.P);EV(s,'A',ta)}EV(s,'V',t-.03,{v:'pace'});s.sp.push({t:t-.03,a:1.6,d:D.SP});G(s,1.65,t+.02,.035,.045,D.PC);G(s,.6,t+.33,.07,.05,neg(D.PC))},0)},
+ pvc:s=>{const rr=60/rn(65,85),d=PVCD(),cp=rn(.5,.62),k=Math.floor(rn(1,3.5)),idx=[];let i=Math.floor(rn(2,5));for(let j=0;j<k;j++){idx.push(i);i+=Math.floor(rn(4,8))}
+  ectopicRun(s,rr,{idx,make:(s,tp)=>pvc(s,tp+cp*rr,d)})},
+ pvcf:s=>{const rr=60/rn(65,85),d=PVCD(),cp=rn(.5,.6),ty=pick(['big','tri','cpl']),idx=[];
+  if(ty==='cpl'){for(let i=2;i<40;i+=Math.floor(rn(4,6)))idx.push(i);ectopicRun(s,rr,{idx,skip2:true,make:(s,tp)=>{pvc(s,tp+cp*rr,d);pvc(s,tp+cp*rr+.44,d)}})}
+  else{const st=ty==='big'?2:3;for(let i=1;i<40;i+=st)idx.push(i);ectopicRun(s,rr,{idx,make:(s,tp)=>pvc(s,tp+cp*rr,d)})}},
+ pvcm:s=>{const rr=60/rn(65,85),ds=shuf([D.V,D.V2,D.LB,[.6,.3,.7],[-.6,.5,.5]]),ws=[1,1.25,.8],idx=[];let i=2;while(i<40){idx.push(i);i+=Math.floor(rn(2,4))}
+  ectopicRun(s,rr,{idx,make:(s,tp,k)=>{const j=idx.indexOf(k)%3;pvc(s,tp+rn(.48,.62)*rr,ds[j],ws[j])}})},
+ ront:s=>{const rr=60/rn(65,85),d=PVCD(),run=Math.random()<.4,i0=Math.floor(rn(3,6));
+  ectopicRun(s,rr,{idx:[i0],skip2:run,make:(s,tp)=>{const tv=tp+.26;pvc(s,tv,d);if(run){for(let k=1;k<=Math.floor(rn(3,6));k++){const t=tv+k*.32;EV(s,'V',t-.05,{v:'pvc',site:[112,205]});G(s,1.3,t,.035,.045,d);G(s,.6,t+.14,.05,.05,neg(d))}}}})},
+ pac:s=>{const rr=60/rn(65,85),pd=pick([neg(D.P),[-.2,.9,.4],[.9,.1,-.3]]),pa=pick([.1,.13]);let t=rn(.25,.5),n=0;const at=new Set([Math.floor(rn(2,5)),Math.floor(rn(8,12))]);
+  while(t<DUR+.4){n++;if(at.has(n)){const tp=t-rr+rr*rn(.58,.72);beat(s,tp,{p:pa,pD:pd,pr:.14});t=tp+rr}else{beat(s,t);t+=rr*(1+rn(-.015,.015))}}},
+ vt:s=>{const rr=60/rn(140,210),d=pick([D.V,D.LB,[-.4,.7,.6],D.V2]),w=rn(.9,1.3);for(let t=.2;t<DUR+.3;t+=rr*(1+rn(-.02,.02))){EV(s,'V',t-.05,{v:'pvc',site:[112,205]});G(s,1.4,t,.045*w,.05*w,d);G(s,.9,t+.15*w,.05,.06,neg(d))}},
+ vf:s=>{const k=pick([1,.42]);waves(s,[{a:.6*k,f:rn(4,4.6),p:rn(0,6),m:.28,d:[.5,.8,-.2]},{a:.4*k,f:rn(5.3,6),p:rn(0,6),m:.21,d:[-.3,.7,.6]},{a:.25*k,f:rn(6.6,7.4),p:rn(0,6),m:.33,d:[.8,.2,.5]}])},
+ qt:s=>{const tc=rn(.4,.48);reg(.4,rn(.9,1.2),t=>beat(s,t,{tc,t1:.085,t2:.06,ta:rn(.22,.32)}),.01)},
+ wpw:s=>{const dd=pick([D.R,[-.3,.9,.2],[.8,-.3,.3],[.2,.4,-.9]]),pr=rn(.09,.12);reg(.35,60/rn(60,85),t=>{EV(s,'A',t-pr-.05);EV(s,'V',t-.09,{v:'wpw'});G(s,.15,t-pr,.022,.022,D.P);G(s,.32,t-.03,.028,.012,dd);G(s,1.0,t,.012,.012,D.R);G(s,.15,t+.03,.01,.01,D.S);G(s,.15,t+.29,.06,.04,D.T)},.01)},
+ hyk:s=>{const mod=Math.random()<.5;reg(.35,60/rn(60,85),t=>beat(s,t,mod?{p:.04,rw:.022,ta:1.1,tc:.25,t1:.032,t2:.03}:{p:.1,rw:.013,ta:rn(.8,1),tc:.24,t1:.03,t2:.028}),.01)},
+ hypk:s=>{const u=rn(.15,.3),ta=rn(.04,.1);reg(.4,60/rn(60,80),t=>beat(s,t,{ta,tc:.24,st:-.06,stD:D.T,u}),.01)},
+ osb:s=>{const j=rn(.25,.5);reg(.5,60/rn(38,50),t=>{beat(s,t,{tc:.33,t1:.06,t2:.045});G(s,j,t+.05,.015,.03,D.R)},.01)},
+ asys:s=>{if(Math.random()<.4)for(let t=rn(.3,1);t<DUR;t+=60/rn(30,50))P(s,t)},
+ pea:s=>{if(Math.random()<.5)reg(.5,60/rn(60,90),t=>beat(s,t,{rw:.02,tc:.32,ta:.25}),.02);else for(let t=rn(.4,1);t<DUR+.3;t+=60/rn(25,40)){EV(s,'V',t-.05,{v:'pvc',site:[140,238]});G(s,.7,t,.05,.06,D.V);G(s,.25,t+.4,.09,.07,neg(D.V))}},
+ tdp:s=>{s.tdp=2.4;beat(s,.4,{tc:.44,t1:.085,t2:.06,ta:.28});beat(s,1.45,{tc:.44,t1:.085,t2:.06,ta:.28});
+  const A=nz([.5,.8,-.2]),B=nz([-.3,.2,.9]),f=rn(3.6,4.8),tw=rn(.15,.3),i0=Math.floor(2.35*FS);
+  for(let i=i0;i<N;i++){const t=i/FS,ramp=Math.min(1,(t-2.35)/.25),env=ramp*(.75+.45*Math.sin(2*Math.PI*rn(.4,.42)*t)),w=2*Math.PI*tw*t,v=1.1*env*Math.sin(2*Math.PI*f*(t-2.35));AV(s,i,v*Math.cos(w),A);AV(s,i,v*Math.sin(w),B)}
+  for(let t=2.4;t<DUR;t+=1/f){s.qrs.push(t);s.ev.push({k:'V',t,v:'pvc',site:[112,205]})}},
+ afl:s=>{const o=rn(0,1),ty=pick([2,3,4,'v']);let t=.3+.2*(1-o);while(t<DUR+.3){beat(s,t,{p:0});t+=.2*(ty==='v'?pick([2,4]):ty)}
+  for(let i=0;i<N;i++){const ph=((i/FS)*5+o)%1,v=ph<.22?-ph/.22:-1+(ph-.22)/.78;AV(s,i,.2*(v+.5),D.P)}
+  for(let tt=(1-o)/5;tt<DUR;tt+=.2)s.ev.push({k:'A',t:tt,ec:true,s2:[96,86],s3:[-36,-30,34]})},
+ psvt:s=>reg(.2,60/rn(150,220),t=>beat(s,t,{p:0,tc:.2,t1:.035,t2:.03,ta:.25}),0)
+};
+
+VG.q_pe=s=>{const ty=pick(['tach','s1q3t3','rbbb','raxis']),rr=60/rn(100,130);
+ reg(.3,rr,t=>{
+  if(ty==='raxis'){beat(s,t,{p:.24,pD:[.2,.95,.1],q:.12,r:.7,sw:.15,ta:.16,tc:.22,t1:.045,t2:.035});G(s,.6,t+.005,.014,.014,[-.55,.75,.35]);G(s,-.25,t+.23,.05,.04,[-.3,.6,.8]);return}
+  beat(s,t,{ta:ty==='tach'?.26:.18,tc:.22,t1:.045,t2:.035});
+  if(ty==='s1q3t3'){G(s,.15,t-.025,.008,.008,[.5,-.85,0]);G(s,.32,t+.03,.012,.012,[-1,.15,0]);G(s,-.22,t+.23,.05,.04,[-.45,.85,.2])}
+  if(ty==='rbbb'){G(s,1.0,t+.05,.018,.024,D.RB);G(s,-.3,t+.25,.05,.04,[-.3,.6,.8])}
+ },.01)};
+C.forEach(c=>{if(VG[c.id])c.gen=VG[c.id]});
+
+const CATS={rate:'心拍数・調律',av:'房室ブロック・ペーシング',pvc:'期外収縮',lethal:'致死性不整脈・心停止',cond:'伝導異常・QT',st:'虚血（ST・T波）',el:'電解質・体温',art:'アーチファクト（ノイズ）',lung:'右心負荷（肺血栓塞栓症）'};
+const LN={II:'標準貼り（Ⅱ誘導）',CM1:'CM1（V1相当）',CM2:'CM2（V2相当）',CM3:'CM3（V3相当）',CM4:'CM4（V4相当）',CM5:'CM5（V5相当）',CM6:'CM6（V6相当）',CM4R:'CM4R（V4R相当）',aVR:'aVR相当（赤と緑を入れ替え）'};
+const COL={r:['赤','#d62b2b','#fff'],y:['黄','#e8b600','#222'],g:['緑','#1f9d4a','#fff']};
+const STD_PL={II:{r:'RSC',y:'LSC',g:'LLA'}};['CM1','CM2','CM3','CM4','CM5','CM6','CM4R'].forEach(k=>STD_PL[k]={r:'MAN',y:'RSC',g:k});STD_PL.aVR={r:'LLA',y:'LSC',g:'RSC'};
+
+function sig(c){const s=sigNew();s.stK=rn(.75,1.35);RRK=VG[c.id]?1:rn(.85,1.18);c.gen(s);RRK=1;
+ {const ay=rn(-.16,.16),ax=rn(-.12,.12),k=rn(.85,1.2),cy=Math.cos(ay),sy=Math.sin(ay),cx=Math.cos(ax),sx=Math.sin(ax);
+  const rv=(X,Y,Z)=>{const x1=X*cy+Z*sy,z1=-X*sy+Z*cy;return[x1*k,(Y*cx-z1*sx)*k,(Y*sx+z1*cx)*k]};
+  for(let i=0;i<N;i++){const r=rv(s.x[i],s.y[i],s.z[i]);s.x[i]=r[0];s.y[i]=r[1];s.z[i]=r[2]}s.sp.forEach(p=>{p.d=rv(...nz(p.d))})}
+const w=rn(0,6);for(let i=0;i<N;i++)s.n[i]=.03*Math.sin(2*Math.PI*.22*i/FS+w)+(Math.random()-.5)*.016+(s.ar?s.ar[i]:0);return s}
+function proj(s,lv){const y=new Float64Array(N);for(let i=0;i<N;i++)y[i]=s.x[i]*lv[0]+s.y[i]*lv[1]+s.z[i]*lv[2]+s.n[i];return{y,sp:s.sp.map(p=>({t:p.t,v:p.a*K*dot(nz(p.d),lv)}))}}
+/* 設定から (+,−) を決める */
+function pair(pl,set){if(!pl.r||!pl.y||!pl.g)return null;return set==='I'?[pl.y,pl.r]:set==='III'?[pl.g,pl.y]:[pl.g,pl.r]}
+const ROMAN={I:'Ⅰ',II:'Ⅱ',III:'Ⅲ'};
+function pairName(p,n){
+ const k=p+'|'+n,T={'LSC|RSC':'Ⅰ誘導','LLA|RSC':'Ⅱ誘導','LLA|LSC':'Ⅲ誘導','RSC|LLA':'aVR相当（Ⅱの反転）','RSC|LSC':'Ⅰ誘導の反転','LSC|LLA':'Ⅲ誘導の反転'};
+ if(T[k])return T[k];
+ if(n==='MAN'&&/^CM/.test(p))return LN[p];
+ if(p==='MAN'&&/^CM/.test(n))return LN[n].replace(/（.*/,'')+'の反転（上下逆）';
+ return '手順書にない誘導（＋'+SPOT[p][3]+'／−'+SPOT[n][3]+'）'}
+function cfg(pl,set){if(set!=='II')return null;for(const k in STD_PL){const s=STD_PL[k];if(pl.r===s.r&&pl.y===s.y&&pl.g===s.g)return k}return null}
+
+let anim=0,cur=null;
+function drawStrip(cv,pr,lab,animate){
+ cancelAnimationFrame(anim);
+ const W=cv.parentElement.clientWidth,pxm=W/4*.4,h0=Math.round(4.4*pxm),pxm2=pxm*.6,h1=Math.round(4.2*pxm2),H=h0+h1,dpr=window.devicePixelRatio||1;
+ const ROWS=[{a:0,b:4,top:0,h:h0,m:pxm,lab:'0〜4秒'},{a:0,b:DUR,top:h0,h:h1,m:pxm2,lab:'0〜15秒（全体・縮小）'}];
+ cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';cv._g={W,h0,h1};
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+ const ln=(x0,y0,x1,y1,c,w)=>{x.strokeStyle=c;x.lineWidth=w;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke()};
+ const paint=p=>{
+  x.fillStyle='#fff5f6';x.fillRect(0,0,W,H);
+  const st=pxm*.1;
+  for(let j=0;j*st<=h0+1;j++)ln(0,j*st,W,j*st,j%5?'#f7d6db':'#eda2ad',j%5?.5:1);
+  for(let i=0;i*st<=W+1;i++)ln(i*st,0,i*st,h0,i%5?'#f7d6db':'#eda2ad',i%5?.5:1);
+  const R1=ROWS[1],s1=W/(R1.b-R1.a);
+  for(let j=0;j*pxm2*.5<=h1+1;j++)ln(0,h0+j*pxm2*.5,W,h0+j*pxm2*.5,'#f2c0c8',.6);
+  for(let i=0;i<=R1.b;i++)ln(i*s1,h0,i*s1,H,i%5?'#efb5be':'#d98896',i%5?.6:1.3);
+  ln(0,h0,W,h0,'#c97483',2);
+  /* 上段の範囲を下段に示す */
+  x.fillStyle='rgba(29,58,100,.08)';x.fillRect(0,h0,4*s1,h1);
+  x.font='700 12px "Noto Sans JP",sans-serif';
+  ROWS.forEach((R,r)=>{const top=R.top;if(r===0){x.fillStyle='rgba(255,245,246,.88)';const tw=Math.min(W-90,x.measureText(lab).width);x.fillRect(4,top+3,tw+8,18);x.fillStyle='#14233b';x.fillText(lab,8,top+16,W-94)}
+   const t2=R.lab,w2=x.measureText(t2).width;x.fillStyle='rgba(255,245,246,.88)';x.fillRect(W-w2-10,top+3,w2+8,18);x.fillStyle='#8a4a55';x.fillText(t2,W-w2-6,top+16)});
+  x.lineJoin='round';
+  ROWS.forEach((R,r)=>{const top=R.top,b=top+R.h*.58,pxs=W/(R.b-R.a),fr=r===0?Math.min(1,p*2):Math.max(0,Math.min(1,p*2-1));if(fr<=0)return;
+   const i0=Math.round(R.a*FS),i1=Math.min(N,Math.round((R.a+(R.b-R.a)*fr)*FS));
+   x.strokeStyle='#121c30';x.lineWidth=r?1:1.6;x.beginPath();
+   for(let i=i0;i<i1;i++){const px=(i/FS-R.a)*pxs,py=Math.min(top+R.h-2,Math.max(top+2,b-pr.y[i]*R.m));i===i0?x.moveTo(px,py):x.lineTo(px,py)}x.stroke();
+   x.lineWidth=r?.9:1.3;pr.sp.forEach(q=>{if(q.t<R.a||q.t>=i1/FS)return;const px=(q.t-R.a)*pxs;x.beginPath();x.moveTo(px,b);x.lineTo(px,Math.min(top+R.h-2,Math.max(top+2,b-q.v*R.m)));x.stroke()})});
+ };
+ if(!animate||window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(1);return}
+ const t0=performance.now(),Dm=5000;
+ const step=n=>{const p=Math.min(1,(n-t0)/Dm);paint(p);if(p<1)anim=requestAnimationFrame(step)};anim=requestAnimationFrame(step)}
+function show(id,s,lv,lab,animate){const pr=proj(s,lv);cur={id,pr,lab};const cv=document.getElementById(id);if(cv)drawStrip(cv,pr,lab,animate)}
+new ResizeObserver(()=>{const c12=document.getElementById('c12');if(c12&&cur12&&Math.round(c12.width/(window.devicePixelRatio||1))!==c12.parentElement.clientWidth)draw12(c12,cur12,cur12Sel);if(!cur)return;const cv=document.getElementById(cur.id);if(cv&&Math.round(cv.width/(window.devicePixelRatio||1))!==cv.parentElement.clientWidth)drawStrip(cv,cur.pr,cur.lab,false)}).observe(document.getElementById('app'));
+
+function bodySVG(pl){
+ const occ={};for(const k in pl)if(pl[k])occ[pl[k]]=k;
+ let h='<svg viewBox="0 0 400 345" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="電極の貼付位置（患者正面）"><g fill="none" stroke="#7d8a9c" stroke-width="2.2"><path d="M178 18 L178 58 Q120 62 78 82 Q58 92 56 130 L64 250 Q70 320 80 345 M222 18 L222 58 Q280 62 322 82 Q342 92 344 130 L336 250 Q330 320 320 345"/><path d="M200 78 Q150 66 100 74 M200 78 Q250 66 300 74"/><rect x="191" y="80" width="18" height="28" rx="4"/><rect x="193" y="108" width="14" height="100" rx="4"/><path d="M200 208 L200 226"/><path d="M193 210 Q150 250 92 268 M207 210 Q250 250 308 268"/><g stroke="#b9c3cf" stroke-width="1.5"><path d="M191 118 Q140 112 80 130 M209 118 Q260 112 320 130"/><path d="M193 142 Q140 138 76 158 M207 142 Q260 138 324 158"/><path d="M193 166 Q140 164 74 186 M207 166 Q260 164 326 186"/><path d="M193 190 Q140 190 76 214 M207 190 Q260 190 324 214"/></g></g><text x="30" y="34" font-size="17" fill="#7d8a9c" font-weight="700">患者の右</text><text x="300" y="34" font-size="17" fill="#7d8a9c" font-weight="700">患者の左</text>';
+ for(const k in SPOT){const[cx,cy]=SPOT[k],o=occ[k];
+  h+=o?`<circle cx="${cx}" cy="${cy}" r="13" fill="${COL[o][1]}" stroke="#fff" stroke-width="3"/><text x="${cx}" y="${cy+5}" font-size="14" font-weight="900" text-anchor="middle" fill="${COL[o][2]}">${COL[o][0]}</text>`:`<circle cx="${cx}" cy="${cy}" r="9" fill="#fff" fill-opacity=".6" stroke="#5b687c" stroke-width="1.6" stroke-dasharray="3 2"/>`;
+  h+=`<circle class="hit" data-s="${k}" cx="${cx}" cy="${cy}" r="15" fill="transparent"/>`}
+ return h+'</svg>'}
+function accText(c){return c.acc.map(a=>LN[a]).join(' ／ ')}
+function how(l){return l==='II'?'赤＝右鎖骨下・黄＝左鎖骨下・緑＝左下腹部':l==='aVR'?'赤＝左下腹部・黄＝左鎖骨下・緑＝右鎖骨下':'赤＝胸骨柄・黄＝右鎖骨下・緑＝'+SPOT[l][3]}
+function opts(c){const pool=c.dx?c.dx.map(id=>C.find(x=>x.id===id)):[];const same=shuf(C.filter(x=>x.cat===c.cat&&x!==c&&!pool.includes(x)));const oth=shuf(C.filter(x=>x.cat!==c.cat&&x!==c&&!pool.includes(x)));return shuf([c,...shuf(pool),...same,...oth].slice(0,4))}
+function featHTML(c){return `<ul class="pts">${c.pts.map(p=>`<li>${p}</li>`).join('')}</ul><div class="sm"><b>対応の目安：</b>${ACTS[ACTMAP[c.id]]}</div><div class="sm"><b>おすすめの貼り方：</b>${accText(c)}（${how(c.acc[0])}、設定Ⅱ）。${c.pw||'Ⅱ誘導はP波が最も見やすく、調律・不整脈判定の基本。'}</div>`}
+
+/* 電極パネル（クイズ・図鑑共通） */
+function panelHTML(st){
+ return `<div class="pks">${['r','y','g'].map(k=>`<button class="pk ${st.cc===k?'on':''}" data-c="${k}" aria-pressed="${st.cc===k}">${COL[k][0]}</button>`).join('')}</div>
+ <div class="mut">色を選んで体の点をタップ → 下の波形がすぐ変わります</div>
+ <div class="body">${bodySVG(st.pl)}</div>
+ <div class="pl">${['r','y','g'].map(k=>`<div><span class="dot" style="background:${COL[k][1]}"></span>${COL[k][0]}：${st.pl[k]?SPOT[st.pl[k]][3]:'<span class="mut">未設定</span>'}</div>`).join('')}</div>
+ <div class="mut" style="margin-bottom:4px">モニターの誘導設定</div>
+ <div class="seg">${['I','II','III'].map(k=>`<button data-set="${k}" class="${st.set===k?'on':''}">${ROMAN[k]}</button>`).join('')}</div>
+ <div class="sm">設定Ⅰ＝黄（＋）−赤（−）／Ⅱ＝緑（＋）−赤（−）／Ⅲ＝緑（＋）−黄（−）</div>
+ <div class="seg" style="margin-top:10px">${['II','CM1','CM2','CM3','CM4','CM5','CM6','CM4R','aVR'].map(k=>`<button data-std="${k}">${k==='II'?'標準貼り':k}</button>`).join('')}</div>
+ <div class="sm">↑ ワンタッチで手順書どおりの貼り方にする</div>`}
+function bindPanel(root,st,redraw){
+ root.querySelector('.body').onclick=e=>{const t=e.target.closest('[data-s]');if(!t)return;const sp=t.dataset.s;for(const k in st.pl)if(st.pl[k]===sp&&k!==st.cc)st.pl[k]=st.pl[st.cc];st.pl[st.cc]=sp;redraw()};
+ root.querySelectorAll('.pk').forEach(b=>b.onclick=()=>{st.cc=b.dataset.c;redraw()});
+ root.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{st.set=b.dataset.set;redraw()});
+ root.querySelectorAll('[data-std]').forEach(b=>b.onclick=()=>{st.pl=Object.assign({},STD_PL[b.dataset.std]);st.set='II';redraw()})}
+function stripFor(st,s,id,animate){const p=pair(st.pl,st.set);const lab=pairName(p[0],p[1])+'（設定'+ROMAN[st.set]+'）';show(id,s,LV(p[0],p[1]),lab,animate);return lab}
+
+
+/* ---- 12誘導 ---- */
+const sub3=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],avg3=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2];
+const L12={I:LV('LSC','RSC'),II:LV('LLA','RSC'),III:LV('LLA','LSC'),aVR:sub3(fe('RSC'),avg3(fe('LSC'),fe('LLA'))),aVL:sub3(fe('LSC'),avg3(fe('RSC'),fe('LLA'))),aVF:sub3(fe('LLA'),avg3(fe('RSC'),fe('LSC')))};
+for(let i=1;i<=6;i++)L12['V'+i]=LV('CM'+i,'MAN');L12.V4R=LV('CM4R','MAN');['V7','V8','V9'].forEach(k=>L12[k]=LV(k,'MAN'));
+const LIMB=['I','II','III','aVR','aVL','aVF'],CHEST=['V1','V2','V3','V4','V5','V6'];
+const LNAME={I:'Ⅰ',II:'Ⅱ',III:'Ⅲ',aVR:'aVR',aVL:'aVL',aVF:'aVF'};
+function draw12(cv,s,sel){
+ const W=cv.parentElement.clientWidth,cw=W/2,pxs=cw/2.5,pxm=pxs*.4,rh=Math.round(3.4*pxm),rr=Math.round(3.6*pxm),H=rh*6+rr,dpr=window.devicePixelRatio||1;
+ cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+ const ln=(a,b,c,d,col,w)=>{x.strokeStyle=col;x.lineWidth=w;x.beginPath();x.moveTo(a,b);x.lineTo(c,d);x.stroke()};
+ x.fillStyle='#fff5f6';x.fillRect(0,0,W,H);
+ const st=pxs*.04;
+ for(let j=0;j*st<=rh*6;j++)ln(0,j*st,W,j*st,j%5?'#f9e0e4':'#eeaab4',j%5?.4:.9);
+ for(let i=0;i*st<=W+1;i++)ln(i*st,0,i*st,rh*6,i%5?'#f9e0e4':'#eeaab4',i%5?.4:.9);
+ const ps=W/10;for(let j=0;j*st<=rr;j++)ln(0,rh*6+j*st,W,rh*6+j*st,j%5?'#f9e0e4':'#eeaab4',j%5?.4:.9);
+ for(let i=0;i*ps*.2<=W+1;i++)ln(i*ps*.2,rh*6,i*ps*.2,H,i%5?'#eeaab4':'#d98896',i%5?.6:1.2);
+ ln(cw,0,cw,rh*6,'#c97483',1.5);for(let r=1;r<=6;r++)ln(0,r*rh,W,r*rh,'#e3a0ab',1);ln(0,rh*6,W,rh*6,'#c97483',2);
+ const trace=(pr,x0,y0,h,ts,te,pxs2)=>{const b=y0+h*.56;x.strokeStyle='#121c30';x.lineWidth=1.3;x.lineJoin='round';x.beginPath();
+  for(let i=Math.round(ts*FS);i<Math.round(te*FS);i++){const px=x0+(i/FS-ts)*pxs2,py=Math.min(y0+h-1,Math.max(y0+1,b-pr.y[i]*pxm));i===Math.round(ts*FS)?x.moveTo(px,py):x.lineTo(px,py)}x.stroke();
+  pr.sp.forEach(q=>{if(q.t<ts||q.t>=te)return;const px=x0+(q.t-ts)*pxs2;ln(px,b,px,Math.min(y0+h-1,Math.max(y0+1,b-q.v*pxm)),'#121c30',1)})};
+ const lab=(t,x0,y0)=>{x.font='700 12px "Noto Sans JP",sans-serif';const w=x.measureText(t).width;x.fillStyle='rgba(255,245,246,.9)';x.fillRect(x0+3,y0+3,w+8,17);x.fillStyle='#14233b';x.fillText(t,x0+7,y0+16)};
+ for(let r=0;r<6;r++){trace(proj(s,L12[LIMB[r]]),0,r*rh,rh,0,2.5,pxs);trace(proj(s,L12[CHEST[r]]),cw,r*rh,rh,0,2.5,pxs);lab(LNAME[LIMB[r]],0,r*rh);lab(CHEST[r],cw,r*rh)}
+ trace(proj(s,L12.II),0,rh*6,rr,0,10,ps);lab('Ⅱ（リズム 0〜10秒）',0,rh*6);
+ cv._g12={cw,rh};
+ if(sel){const li=LIMB.indexOf(sel),ci=CHEST.indexOf(sel),col=li>=0?0:1,row=li>=0?li:ci;if(row>=0){x.strokeStyle='#1d5fd0';x.lineWidth=3;x.strokeRect(col*cw+1.5,row*rh+1.5,cw-3,rh-3)}}}
+const V12COL={CM1:['V1','#d62b2b','#fff'],CM2:['V2','#e8b600','#222'],CM3:['V3','#1f9d4a','#fff'],CM4:['V4','#8a5a2b','#fff'],CM5:['V5','#222','#fff'],CM6:['V6','#7a3fd0','#fff']};
+function chest12SVG(){let h='<svg viewBox="40 60 330 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="12誘導の胸部電極位置"><g fill="none" stroke="#7d8a9c" stroke-width="2"><path d="M78 82 Q58 92 56 130 L64 250 M322 82 Q342 92 344 130 L336 250"/><path d="M200 78 Q150 66 100 74 M200 78 Q250 66 300 74"/><rect x="191" y="80" width="18" height="28" rx="4"/><rect x="193" y="108" width="14" height="100" rx="4"/><g stroke="#b9c3cf" stroke-width="1.5"><path d="M191 118 Q140 112 80 130 M209 118 Q260 112 320 130"/><path d="M193 142 Q140 138 76 158 M207 142 Q260 138 324 158"/><path d="M193 166 Q140 164 74 186 M207 166 Q260 164 326 186"/><path d="M193 190 Q140 190 76 214 M207 190 Q260 190 324 214"/></g></g>';
+ for(const k in V12COL){const[cx,cy]=SPOT[k],[t,f,c]=V12COL[k];h+=`<circle cx="${cx}" cy="${cy}" r="12" fill="${f}" stroke="#fff" stroke-width="2.5"/><text x="${cx}" y="${cy+4.5}" font-size="10.5" font-weight="900" text-anchor="middle" fill="${c}">${t}</text>`}
+ return h+'</svg>'}
+const AREA12=`<table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:6px"><tr><th style="text-align:left;padding:4px;border-bottom:1px solid var(--line)">誘導</th><th style="text-align:left;padding:4px;border-bottom:1px solid var(--line)">見ている場所</th><th style="text-align:left;padding:4px;border-bottom:1px solid var(--line)">責任冠動脈</th></tr>
+<tr><td style="padding:4px">Ⅱ・Ⅲ・aVF</td><td style="padding:4px">下壁</td><td style="padding:4px">RCA（LCXのことも）</td></tr>
+<tr><td style="padding:4px">Ⅰ・aVL・V5・V6</td><td style="padding:4px">側壁</td><td style="padding:4px">LCX・LAD対角枝</td></tr>
+<tr><td style="padding:4px">V1・V2</td><td style="padding:4px">中隔</td><td style="padding:4px">LAD</td></tr>
+<tr><td style="padding:4px">V3・V4</td><td style="padding:4px">前壁</td><td style="padding:4px">LAD</td></tr>
+<tr><td style="padding:4px">aVR</td><td style="padding:4px">広範虚血</td><td style="padding:4px">LMT・多枝病変</td></tr></table>`;
+function ref12HTML(){return `<details style="margin-top:8px"><summary style="font-weight:700;cursor:pointer;min-height:36px">12誘導の電極位置と見ている場所</summary>
+ <div class="body" style="max-width:360px">${chest12SVG()}</div>
+ <div class="sm">四肢：右手＝赤／左手＝黄／左足＝緑／右足＝黒（アース）<br>胸部：V1赤・V2黄・V3緑・V4茶・V5黒・V6紫<br>V1：第4肋間胸骨右縁／V2：第4肋間胸骨左縁／V3：V2とV4の中点／V4：第5肋間左鎖骨中線／V5：V4の高さ前腋窩線／V6：V4の高さ中腋窩線</div>${AREA12}</details>`}
+
+/* ---- 今見ている誘導（視点） ---- */
+const VREG={I:['Ⅰ誘導','高位側壁',[.85,-.45,.1]],II:['Ⅱ誘導','下壁',[0,1,.1]],III:['Ⅲ誘導','下壁（やや右）',[-.35,.94,.05]],aVR:['aVR相当','心臓の右上方（広範な虚血の目安）',[-.7,-.7,.1]],
+ CM1:['CM1（V1相当）','中隔・右室',[-.45,.1,.9]],CM2:['CM2（V2相当）','前壁中隔',[-.05,.1,1]],CM3:['CM3（V3相当）','前壁',[.3,.15,.95]],CM4:['CM4（V4相当）','前壁・心尖部',[.45,.45,.8]],CM5:['CM5（V5相当）','前側壁',[.75,.2,.6]],CM6:['CM6（V6相当）','側壁',[.95,.1,.25]],CM4R:['CM4R（V4R相当）','右室',[-.85,.3,.45]]};
+function viewOf(st){const p=pair(st.pl,st.set);if(!p)return null;const k=p[0]+'|'+p[1];
+ const key={'LSC|RSC':'I','LLA|RSC':'II','LLA|LSC':'III','RSC|LLA':'aVR'}[k]||(p[1]==='MAN'&&/^CM/.test(p[0])?p[0]:null);
+ if(key){const v=VREG[key];return{key,lab:v[0],area:v[1],d:nz(v[2])}}
+ const d=nz(LV(p[0],p[1]));return{key:null,lab:'この貼り方',area:'手順書にない向き（上下が反転していることも）',d}}
+let hView=null;
+
+function leadFigHTML(v){
+ const k=v&&v.key,B='#1d5fd0',G='#9aa6b6';
+ const LIMBA={I:0,II:60,III:120,aVF:90,aVL:-30,aVR:-150},cx=90,cy=92;
+ let a=`<svg viewBox="0 0 180 175" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="肢誘導の向き"><path d="M52 18 L52 34 Q22 38 12 56 L8 175 M128 18 L128 34 Q158 38 168 56 L172 175" fill="none" stroke="#c3ccd8" stroke-width="2"/>`;
+ a+=`<circle cx="${cx}" cy="${cy}" r="56" fill="none" stroke="#c3ccd8" stroke-dasharray="3 3"/>`;
+ if(k&&LIMBA[k]!==undefined){const t=LIMBA[k]*Math.PI/180,r=60,p1=[cx+r*Math.cos(t-.5),cy+r*Math.sin(t-.5)],p2=[cx+r*Math.cos(t+.5),cy+r*Math.sin(t+.5)];a+=`<path d="M${cx} ${cy} L${p1[0]} ${p1[1]} A${r} ${r} 0 0 1 ${p2[0]} ${p2[1]} Z" fill="#4f86e8" fill-opacity=".25"/>`}
+ a+=`<path d="M${cx-14} ${cy-10} C${cx-14} ${cy-22} ${cx+2} ${cy-20} ${cx+4} ${cy-12} C${cx+8} ${cy-22} ${cx+24} ${cy-18} ${cx+20} ${cy-4} C${cx+16} ${cy+12} ${cx+4} ${cy+20} ${cx+6} ${cy+24} C${cx-6} ${cy+16} ${cx-16} ${cy+4} ${cx-14} ${cy-10} Z" fill="#e7a3a3" stroke="#a3585c" stroke-width="1.5"/>`;
+ for(const n in LIMBA){const t=LIMBA[n]*Math.PI/180,on=n===k,ex=cx+64*Math.cos(t),ey=cy+64*Math.sin(t),lx=cx+78*Math.cos(t),ly=cy+78*Math.sin(t)+4;
+  a+=`<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="${on?B:G}" stroke-width="${on?4:1.6}" ${on?'':'stroke-dasharray="4 3"'}/>`;
+  if(on)a+=`<circle cx="${ex}" cy="${ey}" r="8" fill="${B}" stroke="#fff" stroke-width="2"/><text x="${ex}" y="${ey+4}" font-size="11" font-weight="900" fill="#fff" text-anchor="middle">+</text>`;
+  a+=`<text x="${lx}" y="${ly}" font-size="${on?13:11}" font-weight="${on?900:700}" fill="${on?B:'#5b687c'}" text-anchor="middle">${n==='I'?'Ⅰ':n==='II'?'Ⅱ':n==='III'?'Ⅲ':n}</text>`}
+ a+='</svg>';
+ const VP={CM1:[78,150,'#d62b2b'],CM2:[100,153,'#e8b600'],CM3:[121,150,'#1f9d4a'],CM4:[140,143,'#8a5a2b'],CM5:[157,129,'#222'],CM6:[170,108,'#7a3fd0']},hx=104,hy=100;
+ let b=`<svg viewBox="0 0 190 186" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="胸部誘導の向き（胸の輪切り）">
+ <ellipse cx="95" cy="92" rx="88" ry="66" fill="light-dark(#f6eeea,#2b2430)" stroke="#c3a99b" stroke-width="2"/>
+ <ellipse cx="50" cy="88" rx="30" ry="40" fill="#f3d9dd" stroke="#d4aab3"/><ellipse cx="146" cy="84" rx="24" ry="36" fill="#f3d9dd" stroke="#d4aab3"/>
+ <circle cx="95" cy="36" r="11" fill="#e8e1d6" stroke="#b5a998"/>`;
+ if(k&&VP[k]){const p=VP[k],t=Math.atan2(p[1]-hy,p[0]-hx),r=66,p1=[hx+r*Math.cos(t-.42),hy+r*Math.sin(t-.42)],p2=[hx+r*Math.cos(t+.42),hy+r*Math.sin(t+.42)];b+=`<path d="M${hx} ${hy} L${p1[0]} ${p1[1]} A${r} ${r} 0 0 1 ${p2[0]} ${p2[1]} Z" fill="#4f86e8" fill-opacity=".25"/>`}
+ b+=`<ellipse cx="86" cy="94" rx="15" ry="13" fill="#e7a3a3" stroke="#a3585c"/><ellipse cx="108" cy="72" rx="16" ry="11" fill="#e7a3a3" stroke="#a3585c"/>
+ <path d="M80 108 Q92 128 116 124 L112 104 Q96 102 80 108 Z" fill="#dc8f8f" stroke="#a3585c"/><ellipse cx="124" cy="98" rx="18" ry="20" fill="#d47f7f" stroke="#a3585c"/>
+ <g font-size="9" font-weight="700" fill="#5a3a3d" text-anchor="middle"><text x="84" y="97">右房</text><text x="108" y="75">左房</text><text x="96" y="120">右室</text><text x="126" y="101">左室</text></g>`;
+ for(const n in VP){const p=VP[n],on=n===k,ex=['CM4R','V7','V8','V9'].includes(n);if(!ex||on)b+=`<line x1="${hx}" y1="${hy}" x2="${p[0]}" y2="${p[1]}" stroke="${on?B:G}" stroke-width="${on?4:1.4}" ${on?'':'stroke-dasharray="4 3"'}/>`;
+  b+=`<circle cx="${p[0]}" cy="${p[1]}" r="${on?8:5.5}" fill="${on?B:p[2]}" stroke="#fff" stroke-width="1.5"/>`+(on?`<text x="${p[0]}" y="${p[1]+4}" font-size="11" font-weight="900" fill="#fff" text-anchor="middle">+</text>`:'');
+  const lx=p[0]+(p[0]-hx)*.2,ly=p[1]+(p[1]-hy)*.2+(n==='CM6'||n==='V7'?-4:n==='V8'||n==='V9'?-2:9);b+=`<text x="${lx}" y="${ly}" font-size="${on?12:ex?8.5:10}" font-weight="${on?900:700}" fill="${on?B:p[2]}" text-anchor="middle">${n==='CM4R'?'V4R':/^CM/.test(n)?'V'+n[2]:n}</text>`}
+ b+=`<g font-size="9" fill="#7d8a9c" font-weight="700"><text x="95" y="20" text-anchor="middle">背中</text><text x="95" y="184" text-anchor="middle">前（胸側）</text><text x="2" y="96">右</text><text x="180" y="66">左</text></g></svg>`;
+ return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px">
+ <div style="background:var(--card);border-radius:8px;padding:4px"><div style="font-size:13px;font-weight:700;text-align:center">肢誘導（正面から）</div>${a}</div>
+ <div style="background:var(--card);border-radius:8px;padding:4px"><div style="font-size:13px;font-weight:700;text-align:center">胸部誘導（胸の輪切り）</div>${b}</div></div>
+ <div class="sm">青い線と＋＝今見ている誘導の視点、青い扇形＝見ている範囲。CM法はV誘導の位置で表示しています。</div>`}
+
+const LSET={I:[{r:'RSC',y:'LSC',g:'LLA'},'I'],II:[{r:'RSC',y:'LSC',g:'LLA'},'II'],III:[{r:'RSC',y:'LSC',g:'LLA'},'III'],aVR:[{r:'LLA',y:'LSC',g:'RSC'},'II']};
+['CM1','CM2','CM3','CM4','CM5','CM6'].forEach(k=>LSET[k]=[{r:'MAN',y:'RSC',g:k},'II']);
+function miniDraw(cv,pr,tt,lab,hr){
+ const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.fillStyle='#0b1220';x.fillRect(0,0,W,H);
+ const win=4,pxs=W/win,pxm=H/3.6,b=H*.6;
+ x.strokeStyle='rgba(78,240,122,.10)';x.lineWidth=1;for(let i=0;i<=win*5;i++){x.beginPath();x.moveTo(i*pxs*.2,0);x.lineTo(i*pxs*.2,H);x.stroke()}
+ for(let j=0;j*pxm*.5<=H;j++){x.beginPath();x.moveTo(0,j*pxm*.5);x.lineTo(W,j*pxm*.5);x.stroke()}
+ x.strokeStyle='#4ef07a';x.lineWidth=1.8;x.lineJoin='round';
+ const i1=Math.floor(tt*FS),i0=Math.max(0,i1-Math.floor((win-.25)*FS));
+ if(pr){x.beginPath();let px0=-1;for(let i=i0;i<=i1&&i<N;i++){const u=i/FS,px=(u%win)*pxs,py=Math.min(H-2,Math.max(2,b-pr.y[i]*pxm));if(px<px0||i===i0)x.moveTo(px,py);else x.lineTo(px,py);px0=px}x.stroke();
+  pr.sp.forEach(q=>{if(q.t*FS<i0||q.t*FS>i1)return;const px=(q.t%win)*pxs;x.beginPath();x.moveTo(px,b);x.lineTo(px,Math.min(H-2,Math.max(2,b-q.v*pxm)));x.stroke()});
+  const cx=(tt%win)*pxs;x.fillStyle='#4ef07a';x.beginPath();x.arc(cx,Math.min(H-2,Math.max(2,b-pr.y[Math.min(N-1,i1)]*pxm)),3,0,7);x.fill()}
+ x.font='700 12px "Noto Sans JP",sans-serif';x.fillStyle='#e8edf5';x.textAlign='left';x.fillText(lab,8,16);
+ x.textAlign='right';x.fillStyle='#9fe9b5';x.fillText('HR',W-48,18);x.font='900 22px "Noto Sans JP",sans-serif';x.fillStyle='#4ef07a';x.fillText(String(hr),W-8,22);x.textAlign='left'}
+
+const ACTS={A1:'直ちにCPRと電気ショック（除細動）',A2:'直ちにCPR。電気ショックの適応はない（原因検索）',A3:'脈の有無を確認し、脈がなければCPR＋電気ショック',A4:'STEMIを疑い、医師に報告して早期にカテーテル治療（PCI）ができる施設へ',A5:'医師に報告し、心電図を記録しながら専門施設へ搬送',A6:'症状・バイタルを観察しながら搬送（急変に注意）',A7:'原因（発熱・脱水・痛み・出血など）を評価して対応',A8:'電極・ケーブルを確認し、患者の意識・呼吸・脈で判断する'};
+const ACTMAP={nsr:'A6',stach:'A7',sbrady:'A5',sss:'A5',af:'A5',avb1:'A6',wen:'A6',mob:'A5',avb3:'A5',pace:'A6',pvc:'A6',pvcf:'A6',pvcm:'A5',ront:'A5',pac:'A6',vt:'A3',vf:'A1',qt:'A5',lbbb:'A5',rbbb:'A6',wpw:'A6',hat:'A4',ste:'A4',stei:'A4',stel:'A4',std:'A5',cort:'A5',hyk:'A5',hypk:'A5',osb:'A5',asys:'A2',pea:'A2',tdp:'A1',afl:'A5',psvt:'A5',post:'A4',rvmi:'A4',extant:'A4',hlat:'A4',apex:'A4',infpost:'A4',lmt:'A4',art_mov:'A8',art_off:'A8',art_hum:'A8',art_emg:'A8',extant:'A4',hlat:'A4',apex:'A4',infpost:'A4',lmt:'A4',q_dissect:'A5',q_myoc:'A5',q_peri:'A5',q_tako:'A4',q_pe:'A5',q_brugada:'A5',q_sah:'A5',q_digi:'A5'};
+const ACTX={A5:'A6',A6:'A5',A1:'A3',A3:'A1',A4:'A5'};
+function actOpts(c){const a=ACTMAP[c.id];return shuf([a,...shuf(Object.keys(ACTS).filter(k=>k!==a&&k!==ACTX[a])).slice(0,3)])}
+
+function hrOf(c,s){if(c.vf||c.lo)return'---';const q=s.qrs.filter(t=>t>=0&&t<=DUR).sort((a,b)=>a-b);if(q.length<2)return'---';return Math.round(60*(q.length-1)/(q[q.length-1]-q[0]))}
+const hrHTML=(c,s)=>`<div class="hrbox"><span>HR</span><b>${hrOf(c,s)}</b><span>/分</span></div>`;
+/* ---- 心臓シミュレーション ---- */
+let hCond=true,hLab=true,hCor=true,hAnim=0,hT0=0,hSpeed=1,hMode='3d',hRot={y:-.35,x:.12,drag:false,auto:true};
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mixA=(A,B,k)=>{k=Math.max(0,Math.min(1,k));return A.map((v,i)=>v+(B[i]-v)*k)};
+const rgb=(a,al)=>`rgba(${a.map(v=>Math.round(Math.max(0,Math.min(255,v)))).join(',')},${al===undefined?1:al})`;
+function mix(a,b,k){return rgb(mixA(hex(a),hex(b),k))}
+const MUSc='#f2c4c4',EXc='#ffd84a',LITc='#ff9f1a',OFFc='#c9a9a9',PATHc='#b68b8b';
+
+/* 状態の計算（平面・立体共通） */
+function heartState(c,A,V,tt){
+ const last=(arr,t)=>{let r=null;for(const e of arr){if(e.t<=t)r=e;else break}return r};
+ const a=last(A,tt),dA=a?tt-a.t:9,v=last(V,tt),dV=v?tt-v.t:9,S={};
+ S.ra=S.la=dA<.1?1-dA/.1:0;S.ak=dA>.04&&dA<.2?1-.05*Math.sin(Math.PI*(dA-.04)/.16):1;
+ if(c.af){S.ra=.25+Math.random()*.5;S.la=.25+Math.random()*.5;S.ak=1}
+ S.sa=!c.af&&a&&!a.ec&&dA<.08;S.inn=S.sa||(!c.af&&a&&!a.ec&&dA<.09);
+ S.sx=c.sa&&dA>1.4;
+ const pend=a&&!a.blk&&!c.avd&&(!v||v.t<a.t);
+ S.av=(pend&&dA<.45)||(c.af&&v&&dV<.05&&v.v==='n');
+ S.x=!c.avd&&a&&a.blk&&dA>.2&&dA<.7;
+ S.ec=null;
+ if(a&&a.ec&&dA<.1)S.ec={s2:a.s2||[212,100],s3:a.s3||[42,-48,-8]};
+ else if(v&&v.v==='pvc'&&dV<.12)S.ec={s2:v.site,s3:SITE3(v.site)};
+ const cond=v&&(v.v==='n'||v.v==='lb'||v.v==='rb'||v.v==='wpw')&&dV<.07;
+ S.his=cond;S.rb=cond&&v.v!=='rb';S.lb=cond&&v.v!=='lb';S.pk=cond&&dV>.02;
+ S.ap=v&&dV<.06;S.pt=v&&dV<.05;
+ S.rv=0;S.lv=0;S.vk=1;if(c.svt)S.av=(tt*3)%1<.5;
+ if(c.vf||(c.tdpT&&tt>c.tdpT)){S.rv=.3+Math.random()*.6;S.lv=.3+Math.random()*.6;S.his=S.rb=S.lb=S.pk=false;S.ec=null}
+ else if(v&&dV<.6){const dl=v.v==='lb'?[0,.06]:v.v==='rb'?[.06,0]:v.v==='wpw'?[.04,0]:v.v==='pvc'?(v.site[0]<150?[0,.06]:[.06,0]):v.v==='pace'?[0,.06]:[.01,.01];
+  const g=d=>{const x=dV-d;return x<0?0:x<.12?1:Math.max(0,1-(x-.12)/.2)};S.rv=g(dl[0]);S.lv=g(dl[1]);
+  const x=dV-.06;S.vk=x>0&&x<.32?1-.08*Math.sin(Math.PI*x/.32):1}
+ if(c.nocon){S.vk=1;S.ak=1}
+ S.tt=tt;return S}
+function SITE3(s){const k=s[0]+','+s[1];return({'112,205':[-26,42,30],'188,236':[34,62,8],'226,168':[58,18,-4],'140,238':[4,58,14]})[k]||[0,40,10]}
+
+/* ---- 平面図 ---- */
+function heartSVG(c){
+ const mus=MUSc,st='#a3585c';
+ let vw='';if(hView){const d=hView.d,h2=Math.hypot(d[0],d[1]),cx0=150,cy0=178;
+  if(h2<.45){vw=`<g><circle cx="${cx0+d[0]*60}" cy="${cy0+d[1]*60}" r="34" fill="#4f86e8" fill-opacity=".28" stroke="#1d5fd0" stroke-width="2" stroke-dasharray="4 3"/><text x="${cx0+d[0]*60}" y="${cy0+d[1]*60+50}" font-size="11" font-weight="700" fill="#1d5fd0" text-anchor="middle">胸の正面側から見ている</text></g>`}
+  else{const ux=d[0]/h2,uy=d[1]/h2,a=Math.atan2(uy,ux),r=105,p1=[cx0+r*Math.cos(a-.5),cy0+r*Math.sin(a-.5)],p2=[cx0+r*Math.cos(a+.5),cy0+r*Math.sin(a+.5)],ex=cx0+ux*150,ey=cy0+uy*150,tx=cx0+ux*112,ty=cy0+uy*112;
+   vw=`<g><path d="M${cx0} ${cy0} L${p1[0]} ${p1[1]} A${r} ${r} 0 0 1 ${p2[0]} ${p2[1]} Z" fill="#4f86e8" fill-opacity=".22"/><line x1="${ex}" y1="${ey}" x2="${tx}" y2="${ty}" stroke="#1d5fd0" stroke-width="4" marker-end="url(#ar)"/><circle cx="${ex}" cy="${ey}" r="10" fill="#1d5fd0" stroke="#fff" stroke-width="2"/><text x="${ex}" y="${ey+4}" font-size="12" font-weight="900" fill="#fff" text-anchor="middle">+</text></g>`}}
+ return `<svg viewBox="-20 -10 340 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="心臓の刺激伝導と収縮のシミュレーション（平面）">
+ <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#1d5fd0"/></marker><pattern id="hz" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="6" fill="#c0303a" fill-opacity=".45"/></pattern></defs>
+ <text x="8" y="16" font-size="12" fill="#7d8a9c" font-weight="700">患者の右</text><text x="240" y="16" font-size="12" fill="#7d8a9c" font-weight="700">患者の左</text>
+ <g id="hAt"><path id="hRA" d="M70 112 C48 92 52 50 92 42 C122 36 142 58 146 84 L146 118 Z" fill="${mus}" stroke="${st}" stroke-width="2"/>
+ <path id="hLA" d="M154 84 C158 56 182 40 210 46 C246 54 252 94 230 114 L154 118 Z" fill="${mus}" stroke="${st}" stroke-width="2"/></g>
+ <g id="hVe"><path id="hRV" d="M70 124 L147 124 L146 254 C100 240 62 196 70 124 Z" fill="${mus}" stroke="${st}" stroke-width="2"/>
+ <path id="hLV" d="M153 124 L232 124 C250 190 210 248 152 262 Z" fill="${mus}" stroke="${st}" stroke-width="2"/>
+ ${c.zone==='ant'?'<path d="M160 132 L224 132 C236 180 210 228 168 246 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='sub'?'<path d="M160 140 C200 150 214 190 196 232 L168 244 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='inf'?'<path d="M84 214 C110 240 130 252 150 256 C180 254 210 236 222 214 L150 230 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='post'?'<path d="M170 140 C214 150 226 196 200 236 L176 246 Z" fill="url(#hz)" opacity=".55"/><text x="196" y="232" font-size="9.5" font-weight="700" fill="#a3202c" text-anchor="middle">後壁（裏側）</text>':''}
+ ${c.zone==='rv'?'<path d="M72 126 L146 126 L146 252 C100 238 64 196 72 126 Z" fill="url(#hz)"/><path d="M84 214 C110 240 130 252 150 256 C180 254 210 236 222 214 L150 230 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='extant'?'<path d="M153 124 L232 124 C250 190 210 248 152 262 Z" fill="url(#hz)"/><path d="M120 126 L147 126 L146 230 C134 220 124 180 120 126 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='hlat'?'<path d="M196 124 L232 124 C238 146 236 160 232 172 C220 156 208 140 196 124 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='apex'?'<path d="M110 226 C130 246 140 256 150 262 C176 256 196 240 206 226 C186 238 170 242 150 242 C134 242 120 236 110 226 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='infpost'?'<path d="M84 214 C110 240 130 252 150 256 C180 254 210 236 222 214 L150 230 Z" fill="url(#hz)"/><path d="M170 140 C214 150 226 196 200 236 L176 246 Z" fill="url(#hz)" opacity=".55"/>':''}
+ ${c.zone==='lmt'?'<path d="M153 124 L232 124 C250 190 210 248 152 262 Z" fill="url(#hz)"/>':''}
+ ${c.zone==='lat'?'<path d="M206 126 L232 124 C246 172 232 212 214 232 C224 196 222 160 206 126 Z" fill="url(#hz)"/>':''}</g>
+ ${vw}
+ ${hCor?(()=>{const ci=c.cor?{a:c.cor[0],t:c.cor[1]}:null;const P={RCA:'M146 112 C120 112 82 116 68 146 C58 190 92 238 140 256',LAD:'M166 116 C162 140 158 190 160 254',DG:'M161 150 C182 160 202 176 216 198',LCX:'M166 116 C196 108 224 112 242 134'};
+  const OCC={'LAD|prox':[165,119],'LAD|dist':[158,226],'RCA|dist':[120,252],'DG|occ':[176,158],'LMT|occ':[160,114],'LAD|occ':[159,124],'LAD|old':[159,124],'LAD|sten':[157,176],'RCA|prox':[120,111],'RCA|mid':[66,160],'LCX|occ':[206,109]};
+  let h='<g fill="none" stroke-linecap="round">';for(const k in P){const dead=ci&&(k===ci.a||(k==='DG'&&ci.a==='LAD'&&ci.t!=='sten'&&ci.t!=='dist')||(ci.a==='LMT'&&k!=='RCA'));h+=`<path d="${P[k]}" stroke="#fff" stroke-width="6" ${k==='LCX'?'stroke-opacity=".6"':''}/><path d="${P[k]}" stroke="${dead&&ci.t!=='sten'?'#7d8796':'#c8202c'}" stroke-width="3" ${dead&&ci.t!=='sten'?'stroke-dasharray="5 4"':''} ${k==='LCX'?'stroke-opacity=".7"':''}/>`}
+  h+='<path d="M154 112 L166 116" stroke="#c8202c" stroke-width="3"/><circle cx="150" cy="110" r="6" fill="#d2585a" stroke="#fff" stroke-width="1.5"/></g><g class="lb" font-size="10" font-weight="700" fill="#a3202c"><text x="60" y="132">RCA</text><text x="166" y="200">LAD</text><text x="222" y="108">LCx</text><text x="160" y="106" font-size="8.5">LMT</text></g>';
+  if(ci){const o=OCC[ci.a+'|'+ci.t];if(o){if(ci.t!=='sten'){const pp={LAD:ci.t==='dist'?'M166 116 C162 140 158 190 158 226':ci.t==='prox'?'M166 116 L165 119':'M166 116 L159 124',RCA:ci.t==='prox'?'M146 112 L120 111':ci.t==='dist'?'M146 112 C120 112 82 116 68 146 C58 190 92 238 120 252':'M146 112 C112 108 78 118 66 160',LCX:'M166 116 L206 109',DG:'M161 150 L176 158',LMT:'M154 112 L160 114'}[ci.a];h+=`<path d="${pp}" fill="none" stroke="#c8202c" stroke-width="3"/>`}
+   h+=`<circle cx="${o[0]}" cy="${o[1]}" r="8" fill="${ci.t==='sten'?'#e8b600':'#111'}" stroke="#fff" stroke-width="2"/><path d="M${o[0]-4} ${o[1]-4} L${o[0]+4} ${o[1]+4} M${o[0]+4} ${o[1]-4} L${o[0]-4} ${o[1]+4}" stroke="${ci.t==='sten'?'#111':'#fff'}" stroke-width="2.2"/><text x="${o[0]}" y="${o[1]-12}" font-size="11" font-weight="900" text-anchor="middle" fill="#111" class="lb">${ci.t==='sten'?'狭窄':'閉塞'}</text>`}}
+  return h})():''}
+
+ <g fill="none" stroke-linecap="round">
+ <path id="hIN" class="cd" d="M86 60 C100 80 130 100 150 121" stroke="${OFFc}" stroke-width="3" stroke-dasharray="4 4"/>
+ <path id="hHis" class="cd" d="M150 121 L150 140" stroke="${PATHc}" stroke-width="5"/>
+ <path id="hRB" class="cd" d="M148 140 C140 170 126 205 112 236" stroke="${PATHc}" stroke-width="4" ${c.blk==='R'?'stroke-dasharray="5 5"':''}/>
+ <path id="hLB" class="cd" d="M152 140 C166 170 184 205 196 240" stroke="${PATHc}" stroke-width="4" ${c.blk==='L'?'stroke-dasharray="5 5"':''}/>
+ <path id="hPK" class="cd" d="M112 236 L96 214 M112 236 L130 246 M196 240 L214 214 M196 240 L176 252" stroke="${PATHc}" stroke-width="2"/>
+ ${c.ap?'<path id="hAP" class="cd" d="M226 112 L230 136" stroke="#7a3fd0" stroke-width="6"/>':''}
+ ${c.pl?'<path id="hPL" d="M96 0 C96 30 100 60 104 100 C108 150 112 200 118 236" stroke="#5b687c" stroke-width="3"/><circle id="hPT" cx="118" cy="236" r="6" fill="#5b687c"/>':''}
+ </g>
+ ${c.blk?`<text class="cd" x="${c.blk==='L'?176:118}" y="182" font-size="22" font-weight="900" fill="#d62b2b">✕</text>`:''}
+ ${c.avd?'<text class="cd" x="160" y="116" font-size="20" font-weight="900" fill="#d62b2b">✕</text>':''}
+ <circle id="hSA" class="cd" cx="86" cy="58" r="7" fill="${OFFc}" stroke="#fff" stroke-width="2"/>
+ <circle id="hAV" class="cd" cx="150" cy="121" r="7" fill="${OFFc}" stroke="#fff" stroke-width="2"/>
+ <circle id="hEC" cx="0" cy="0" r="9" fill="#ffd84a" stroke="#d62b2b" stroke-width="3" opacity="0"/>
+ <text id="hX" class="cd" x="160" y="116" font-size="20" font-weight="900" fill="#d62b2b" opacity="0">✕</text>
+ <text class="lb" id="hSX" x="60" y="36" font-size="13" font-weight="900" fill="#d62b2b" opacity="0">洞停止中</text>
+ <g class="lb" font-size="12" font-weight="700" fill="#5a3a3d" text-anchor="middle"><text x="104" y="96">右房</text><text x="206" y="90">左房</text><text x="104" y="172">右室</text><text x="196" y="158">左室</text></g>
+ <g class="lb" font-size="10.5" fill="#5b687c"><text class="cd" x="96" y="62">洞結節</text><text class="cd" x="160" y="134">房室結節</text>${c.ap?'<text x="238" y="128">副伝導路</text>':''}${c.pl?'<text x="104" y="20">ペーシングリード</text>':''}</g>
+ </svg>`}
+function apply2D(root,S){
+ const $=id=>root.querySelector('#'+id),sc=(el,k,cx,cy)=>el&&el.setAttribute('transform',`translate(${cx} ${cy}) scale(${k}) translate(${-cx} ${-cy})`);
+ $('hRA').setAttribute('fill',mix(MUSc,EXc,S.ra));$('hLA').setAttribute('fill',mix(MUSc,EXc,S.la));sc($('hAt'),S.ak,150,84);
+ $('hSA').setAttribute('fill',S.sa?LITc:OFFc);$('hIN').setAttribute('stroke',S.inn?LITc:OFFc);$('hSX').setAttribute('opacity',S.sx?1:0);
+ $('hAV').setAttribute('fill',S.av?LITc:OFFc);$('hX').setAttribute('opacity',S.x?1:0);
+ const ec=$('hEC');if(S.ec){ec.setAttribute('cx',S.ec.s2[0]);ec.setAttribute('cy',S.ec.s2[1]);ec.setAttribute('opacity',1)}else ec.setAttribute('opacity',0);
+ $('hHis').setAttribute('stroke',S.his?LITc:PATHc);$('hRB').setAttribute('stroke',S.rb?LITc:PATHc);$('hLB').setAttribute('stroke',S.lb?LITc:PATHc);$('hPK').setAttribute('stroke',S.pk?LITc:PATHc);
+ const ap=$('hAP');if(ap)ap.setAttribute('stroke',S.ap?LITc:'#7a3fd0');const pt=$('hPT');if(pt)pt.setAttribute('fill',S.pt?LITc:'#5b687c');
+ $('hRV').setAttribute('fill',mix(MUSc,EXc,S.rv));$('hLV').setAttribute('fill',mix(MUSc,EXc,S.lv));sc($('hVe'),S.vk,150,140)}
+
+/* ---- 立体（自作の3D描画） x=患者の左, y=下, z=前 ---- */
+const cross3=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+function mesh(cen,r,opt){opt=opt||{};const nu=opt.nu||24,nv=opt.nv||14,P=[],F=[],ax=nz(opt.axis||[0,1,0]);
+ let ref=Math.abs(ax[2])>.9?[1,0,0]:[0,0,1];const U=nz(cross3(ref,ax)),Wv=cross3(ax,U);
+ for(let j=0;j<=nv;j++){const v=j/nv*Math.PI;for(let i=0;i<nu;i++){const u=i/nu*2*Math.PI;let x=r[0]*Math.sin(v)*Math.cos(u),y=-r[1]*Math.cos(v),z=r[2]*Math.sin(v)*Math.sin(u);
+  if(opt.taper&&y>0){const k=1-opt.taper*Math.pow(y/r[1],1.4);x*=k;z*=k}if(opt.flat&&y<-r[1]*opt.flat)y=-r[1]*opt.flat;
+  P.push([cen[0]+x*U[0]+y*ax[0]+z*Wv[0],cen[1]+x*U[1]+y*ax[1]+z*Wv[1],cen[2]+x*U[2]+y*ax[2]+z*Wv[2]])}}
+ for(let j=0;j<nv;j++)for(let i=0;i<nu;i++){const a=j*nu+i,b=j*nu+(i+1)%nu,c=(j+1)*nu+(i+1)%nu,d=(j+1)*nu+i;F.push([a,b,c,d])}
+ const FO=F.map(()=>cen);
+ const N=F.map(f=>nz([0,1,2].map(q=>(P[f[0]][q]+P[f[1]][q]+P[f[2]][q]+P[f[3]][q])/4-cen[q])));
+ return{P,F,N,FO,cen}}
+function tube(path,r,n){n=n||12;const P=[],F=[],FO=[],C=[];
+ path.forEach((p,i)=>{const pr=path[Math.max(0,i-1)],nx=path[Math.min(path.length-1,i+1)],t=nz([nx[0]-pr[0],nx[1]-pr[1],nx[2]-pr[2]]);let ref=Math.abs(t[2])>.9?[1,0,0]:[0,0,1];const u=nz(cross3(t,ref)),w=cross3(t,u);
+  const rr=Array.isArray(r)?r[i]:r;for(let k=0;k<n;k++){const a=k/n*2*Math.PI;P.push([p[0]+rr*(Math.cos(a)*u[0]+Math.sin(a)*w[0]),p[1]+rr*(Math.cos(a)*u[1]+Math.sin(a)*w[1]),p[2]+rr*(Math.cos(a)*u[2]+Math.sin(a)*w[2])])}C.push(p)});
+ for(let i=0;i<path.length-1;i++)for(let k=0;k<n;k++){F.push([i*n+k,i*n+(k+1)%n,(i+1)*n+(k+1)%n,(i+1)*n+k]);FO.push([(C[i][0]+C[i+1][0])/2,(C[i][1]+C[i+1][1])/2,(C[i][2]+C[i+1][2])/2])}
+ const N=F.map((f,fi)=>nz([0,1,2].map(q=>(P[f[0]][q]+P[f[1]][q]+P[f[2]][q]+P[f[3]][q])/4-FO[fi][q])));
+ return{P,F,N,FO,cen:C[0]}}
+const H3L=[
+ {k:'LA',m:mesh([28,-44,-22],[31,21,24])},
+ {k:'RA',m:mesh([-36,-34,10],[27,29,26])},
+ {k:'LV',m:mesh([20,20,-6],[38,62,38],{axis:[.42,.85,.3],taper:.62,flat:.72})},
+ {k:'RV',m:mesh([-18,22,22],[34,52,22],{axis:[.18,.92,.35],taper:.55,flat:.72})}];
+const ZX={extant:(k,p)=>(k==='LV'&&p[2]>-2&&p[1]>-20)||(k==='LV'&&p[0]>38&&p[1]<36)||(k==='RV'&&p[0]>-6&&p[2]>18),hlat:(k,p)=>k==='LV'&&p[0]>32&&p[1]<16,apex:(k,p)=>(k==='LV'||k==='RV')&&p[1]>50,infpost:(k,p)=>((k==='LV'||k==='RV')&&p[1]>48)||(k==='LV'&&p[2]<-14&&p[1]>-20),lmt:(k,p)=>k==='LV'};
+const H3={};H3L.forEach(e=>{if(!H3[e.k])H3[e.k]=e.m});
+const P3={SA:[-44,-54,24],AV:[-2,-14,8],HIS:[0,2,8],RB:[[0,2,8],[-8,24,22],[-16,48,28],[-20,64,26]],LB:[[2,2,6],[16,24,6],[28,48,4],[36,70,2]],
+ PK:[[[-20,64,26],[-34,52,30]],[[-20,64,26],[-8,70,24]],[[36,70,2],[52,52,0]],[[36,70,2],[22,74,4]]],IN:[[-44,-54,24],[-30,-38,32],[-12,-22,22],[-2,-14,8]],
+ AP:[[46,-26,-14],[50,-6,-10]],PL:[[-34,-150,18],[-36,-100,20],[-38,-52,30],[-30,0,32],[-20,64,26]]};
+const LAB3=[['右房',[-50,-30,38]],['左房',[50,-50,2]],['右室',[-30,30,46]],['左室',[50,28,30]]];
+
+const CORW={
+ RCA:[[-3,-17,17],[-14,-16,'f'],[-28,-10,'f'],[-42,-2,'f'],[-52,10,'f'],[-56,24,'f'],[-52,38,'b'],[-38,48,'b'],[-20,54,'b'],[-8,58,'b'],[0,66,'b'],[8,76,'b'],[16,84,'b']],
+ LMT:[[13,-21,1],[18,-20,4],[23,-17,8]],
+ LAD:[[23,-17,8],[24,-10,'f'],[18,0,'f'],[12,14,'f'],[12,30,'f'],[18,46,'f'],[28,60,'f'],[40,72,'f'],[48,80,'b']],
+ DG:[[12,14,'f'],[24,20,'f'],[38,28,'f'],[50,38,'f']],DG2:[[15,38,'f'],[28,46,'f'],[40,54,'f']],
+ LCX:[[23,-17,8],[34,-16,'f'],[46,-12,'f'],[56,-4,'f'],[62,8,'b'],[54,16,'b'],[40,22,'b'],[24,26,'b']],
+ OM:[[56,-4,'f'],[62,12,'f'],[63,28,'f'],[58,46,'f']],
+ RVB:[[-28,-10,'f'],[-22,6,'f'],[-16,22,'f']]};
+function snapP(p){if(typeof p[2]==='number')return p;const side=p[2];for(const Rr of [6,10,16]){let best=null;for(const E of H3L){if(!/^(LV|RV|RA|LA)$/.test(E.k))continue;for(const q of E.m.P){if(Math.abs(q[0]-p[0])<Rr&&Math.abs(q[1]-p[1])<Rr&&(best===null||(side==='f'?q[2]>best:q[2]<best)))best=q[2]}}if(best!==null)return[p[0],p[1],best+(side==='f'?2.5:-2.5)]}return[p[0],p[1],0]}
+function smooth(P){if(P.length<3)return P;const o=[];for(let i=0;i<P.length-1;i++){const p0=P[Math.max(0,i-1)],p1=P[i],p2=P[i+1],p3=P[Math.min(P.length-1,i+2)];for(let k=0;k<4;k++){const t=k/4,t2=t*t,t3=t2*t;o.push([0,1,2].map(q=>.5*((2*p1[q])+(-p0[q]+p2[q])*t+(2*p0[q]-5*p1[q]+4*p2[q]-p3[q])*t2+(-p0[q]+3*p1[q]-3*p2[q]+p3[q])*t3)))}}o.push(P[P.length-1]);return o}
+const CHV=[];H3L.forEach(E=>{if(/^(LV|RV|RA|LA)$/.test(E.k))E.m.P.forEach(v=>CHV.push([v,E.m.cen]))});
+function drape(p){const best=[];for(const [v,c0] of CHV){const d=(v[0]-p[0])**2+(v[1]-p[1])**2+(v[2]-p[2])**2;if(best.length<5||d<best[4][0]){best.push([d,v,c0]);best.sort((a,b)=>a[0]-b[0]);if(best.length>5)best.pop()}}
+ let W=0;const q=[0,0,0],n=[0,0,0];best.forEach(([d,v,c0])=>{const w=1/(d+1);W+=w;const nn=nz([v[0]-c0[0],v[1]-c0[1],v[2]-c0[2]]);for(let i=0;i<3;i++){q[i]+=v[i]*w;n[i]+=nn[i]*w}});
+ const N=nz(n);return{p:[q[0]/W+N[0]*3.2,q[1]/W+N[1]*3.2,q[2]/W+N[2]*3.2],n:N}}
+const smooth3=P=>P.map((p,i)=>i===0||i===P.length-1?p:[0,1,2].map(k=>(P[i-1][k]+2*p[k]+P[i+1][k])/4));
+const COR3={},CORN3={};
+for(const k in CORW){let P=smooth(CORW[k].map(snapP));for(let it=0;it<2;it++)P=smooth3(P.map(p=>drape(p).p));const D=P.map(drape);COR3[k]=D.map(d=>d.p);CORN3[k]=D.map(d=>d.n)}
+function nrmNear(k,p){let bi=0,bd=1e9;COR3[k].forEach((q,i)=>{const d=(q[0]-p[0])**2+(q[1]-p[1])**2+(q[2]-p[2])**2;if(d<bd){bd=d;bi=i}});return CORN3[k][bi]}
+const CORU={LAD:{occ:.1,old:.1,sten:.4,prox:.04,dist:.62},RCA:{prox:.07,mid:.36,dist:.72},LCX:{occ:.18},DG:{occ:.18},LMT:{occ:.5}};
+const CORN={DG:'対角枝（D1・#9）',LMT:'LMT（左冠動脈主幹部 #5）',LAD:'LAD（左前下行枝 #6〜10）',RCA:'RCA（右冠動脈 #1〜4）',LCX:'LCx（左回旋枝 #11〜15）'};
+function plSplit(P,u){const L=[0];for(let i=1;i<P.length;i++)L.push(L[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1],P[i][2]-P[i-1][2]));const T=L[L.length-1]*u;let i=1;while(i<P.length-1&&L[i]<T)i++;const f=(T-L[i-1])/((L[i]-L[i-1])||1),m=[0,1,2].map(q=>P[i-1][q]+(P[i][q]-P[i-1][q])*f);return[[...P.slice(0,i),m],[m,...P.slice(i)],m]}
+function plAt(P,u){return plSplit(P,Math.max(.001,Math.min(.999,u)))[2]}
+function corInfo(c){if(!c.cor)return null;const[a,t]=c.cor;return{a,t,u:CORU[a][t]}}
+function draw3D(cv,c,S){
+ const dpr=window.devicePixelRatio||1,W=cv.clientWidth,Hh=cv.clientHeight;if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(Hh*dpr)}
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,Hh);
+ const cy=Math.cos(hRot.y),sy=Math.sin(hRot.y),cx=Math.cos(hRot.x),sx=Math.sin(hRot.x),sc=Math.min(W,Hh)/235;
+ const rot=p=>{const X=p[0]*cy+p[2]*sy,Z=-p[0]*sy+p[2]*cy,Y=p[1]*cx-Z*sx,Z2=p[1]*sx+Z*cx;return[X,Y,Z2]};
+ const prj=q=>{const f=500/(500-q[2]);return[W/2+q[0]*sc*f,Hh/2+(q[1]+18)*sc*f]};
+ const scl=(p,k,o)=>[o[0]+(p[0]-o[0])*k,o[1]+(p[1]-o[1])*k,o[2]+(p[2]-o[2])*k];
+ const L=nz([-.45,-.6,.66]),faces=[];
+ const MU=hex('#d6837c'),EX=hex(EXc),ISC=hex('#a8222e'),BLU=hex('#4f86e8');
+ const ch={RA:[S.ra,S.ak,[0,-50,0]],LA:[S.la,S.ak,[0,-50,0]],RV:[S.rv,S.vk,[0,20,0]],LV:[S.lv,S.vk,[0,20,0]]};
+ for(const E of H3L){const k=E.k,m=E.m,[ex,kk,o]=ch[k]||[0,1,[0,0,0]],T=m.P.map(p=>rot(scl(p,kk,o)));
+  m.F.forEach((f,fi)=>{const a=T[f[0]],b=T[f[1]],d=T[f[3]],c2=T[f[2]];
+   const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],w=[d[0]-a[0],d[1]-a[1],d[2]-a[2]];let n=[u[1]*w[2]-u[2]*w[1],u[2]*w[0]-u[0]*w[2],u[0]*w[1]-u[1]*w[0]];
+   const m2=Math.hypot(n[0],n[1],n[2])||1;n=n.map(v=>v/m2);const cz=(a[0]+b[0]+c2[0]+d[0])/4,cc=[cz,(a[1]+b[1]+c2[1]+d[1])/4,(a[2]+b[2]+c2[2]+d[2])/4];
+   const oc=rot(scl(m.FO[fi],kk,o));if((cc[0]-oc[0])*n[0]+(cc[1]-oc[1])*n[1]+(cc[2]-oc[2])*n[2]<0)n=n.map(v=>-v);
+   if(n[2]<-.05)return;
+   let base=E.col?hex(E.col):MU;if(c.zone&&ZX[c.zone]&&ZX[c.zone](k,m.P[f[0]]))base=mixA(MU,ISC,.55);if(k==='LV'&&c.zone){const p0=m.P[f[0]];if(c.zone==='ant'&&p0[2]>8&&p0[1]>-10)base=mixA(MU,ISC,.55);if(c.zone==='sub'&&p0[0]>42&&p0[1]>-10)base=mixA(MU,ISC,.45);if(c.zone==='lat'&&p0[0]>48&&p0[1]<50)base=mixA(MU,ISC,.55)}
+   if(c.zone==='inf'&&(k==='LV'||k==='RV')&&m.P[f[0]][1]>48)base=mixA(MU,ISC,.55);
+   if(c.zone==='post'&&k==='LV'&&m.P[f[0]][2]<-14&&m.P[f[0]][1]>-20)base=mixA(MU,ISC,.55);
+   if(c.zone==='rv'&&(k==='RV'||(k==='LV'&&m.P[f[0]][1]>48)))base=mixA(MU,ISC,.5);
+   if(hView&&(k==='LV'||k==='RV')){const dd=dot(m.N[fi],hView.d);if(dd>.5)base=mixA(base,BLU,.25+.45*(dd-.5)/.5)}
+   const col=mixA(base,EX,ex),lam=.38+.62*Math.max(0,dot(n,L)),rim=Math.pow(1-Math.max(0,n[2]),2)*.25,spec=Math.pow(Math.max(0,dot(n,nz([L[0],L[1],L[2]+1]))),30)*55;
+   faces.push({z:(a[2]+b[2]+c2[2]+d[2])/4,pts:[a,b,c2,d].map(prj),col:col.map(v=>v*Math.max(.55,lam-rim)+spec)})})}
+
+ /* 冠動脈：心臓の面と一緒に奥行き順で描く */
+ if(hCor){const ci=corInfo(c),tt=S.tt||0,segs=[];
+  const add=(P,flow,art)=>segs.push({P,flow,art});
+  for(const k in COR3){const P=COR3[k];
+   if(ci&&k===ci.a){const[a1,b1]=plSplit(P,ci.u);add(a1,1,k);add(b1,ci.t==='sten'?.35:0,k)}
+   else if(ci&&ci.t!=='sten'&&((ci.a==='LMT'&&k!=='RCA'&&k!=='RVB')||((k==='DG'||k==='DG2')&&ci.a==='LAD'&&ci.u<.3)||(k==='RVB'&&ci.a==='RCA'&&ci.u<.15)||(k==='OM'&&ci.a==='LCX'&&ci.u<.35)))add(P,0,k);
+   else add(P,1,k)}
+  const vis=(art,p)=>Math.max(0,Math.min(1,(rot(nrmNear(art,p))[2]+.12)/.3));
+  segs.forEach(g=>{const Q=g.P.map(rot),pts=Q.map(prj),A=g.P.map(p=>vis(g.art,p));
+   for(let i=0;i<Q.length-1;i++){const p0=pts[i],p1=pts[i+1],z=(Q[i][2]+Q[i+1][2])/2+1.5,fl=g.flow,al=Math.min(A[i],A[i+1]);if(al<.04)continue;
+    faces.push({z,fn:()=>{x.globalAlpha=al;x.lineCap='round';x.setLineDash(fl?[]:[5,4]);x.strokeStyle='rgba(255,255,255,.75)';x.lineWidth=5.5;x.beginPath();x.moveTo(p0[0],p0[1]);x.lineTo(p1[0],p1[1]);x.stroke();
+     x.strokeStyle=fl?'#c8202c':'#788392';x.lineWidth=fl?3.2:2.4;x.beginPath();x.moveTo(p0[0],p0[1]);x.lineTo(p1[0],p1[1]);x.stroke();x.setLineDash([]);x.globalAlpha=1}})}
+   if(g.flow>0)for(let j=0;j<3;j++){const u=((tt*.55*g.flow+j/3)%1+1)%1,p3=plAt(g.P,u);if(vis(g.art,p3)<.5)continue;const q3=rot(p3),q=prj(q3);faces.push({z:q3[2]+2,fn:()=>{x.beginPath();x.arc(q[0],q[1],2.4,0,7);x.fillStyle='#fff';x.fill()}})}});
+  {const r3=rot(COR3.RCA[0]),l3=rot(COR3.LMT[0]),rq=prj(r3),lq=prj(l3);faces.push({z:Math.max(r3[2],l3[2])+2,fn:()=>{x.strokeStyle='#c8202c';x.lineWidth=7;x.lineCap='round';x.beginPath();x.moveTo(rq[0],rq[1]);x.lineTo(lq[0],lq[1]);x.stroke();x.fillStyle='#d2585a';x.strokeStyle='#fff';x.lineWidth=1.5;x.beginPath();x.arc((rq[0]+lq[0])/2,(rq[1]+lq[1])/2,5.5,0,7);x.fill();x.stroke()}})}
+  if(ci){const m=plSplit(COR3[ci.a],ci.u)[2],q3=rot(m),q=prj(q3),st=ci.t==='sten';
+   if(vis(ci.a,m)>.3)faces.push({z:q3[2]+3,fn:()=>{x.beginPath();x.arc(q[0],q[1],8,0,7);x.fillStyle=st?'#e8b600':'#111';x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+    x.strokeStyle=st?'#111':'#fff';x.lineWidth=2.2;x.beginPath();x.moveTo(q[0]-4,q[1]-4);x.lineTo(q[0]+4,q[1]+4);x.moveTo(q[0]+4,q[1]-4);x.lineTo(q[0]-4,q[1]+4);x.stroke()}})}}
+ faces.sort((p,q)=>p.z-q.z);
+ faces.forEach(f=>{if(f.fn){f.fn();return}x.beginPath();f.pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fillStyle=rgb(f.col,.94);x.fill();x.strokeStyle=rgb(f.col,.94);x.lineWidth=.7;x.stroke()});
+ const P2=p=>prj(rot(p));
+ const line=(pts,col,w,dash)=>{const q=pts.map(P2);x.setLineDash(dash||[]);x.lineCap='round';x.lineJoin='round';x.strokeStyle='rgba(255,255,255,.85)';x.lineWidth=w+3;x.beginPath();q.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();x.strokeStyle=col;x.lineWidth=w;x.beginPath();q.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();x.setLineDash([])};
+ const dotp=(p,r,col)=>{const q=P2(p);x.beginPath();x.arc(q[0],q[1],r,0,7);x.fillStyle=col;x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke()};
+ const txt=(t,p,col,sz,dx,dy)=>{const q=P2(p);x.font=`700 ${sz}px "Noto Sans JP",sans-serif`;x.textAlign='center';x.lineWidth=3;x.strokeStyle='rgba(255,255,255,.9)';x.strokeText(t,q[0]+(dx||0),q[1]+(dy||0));x.fillStyle=col;x.fillText(t,q[0]+(dx||0),q[1]+(dy||0))};
+
+ /* 冠動脈と血流 */
+ if(hCor&&hLab){const ci=corInfo(c);
+  [['LAD',8,'LAD',-14],['LCX',10,'LCx',12],['RCA',14,'RCA',-16],['LMT',4,'LMT',0]].forEach(([k,i,t,dx])=>{const j=Math.min(i,COR3[k].length-1),P=COR3[k][j];if(rot(CORN3[k][j])[2]>.1)txt(t,P,'#a3202c',t.length>3?9.5:10.5,dx,k==='LMT'?-10:-6)});
+  if(ci){const m=plSplit(COR3[ci.a],ci.u)[2];if(rot(nrmNear(ci.a,m))[2]>.05)txt(ci.t==='sten'?'狭窄':'閉塞',m,'#111',11,0,-13)}}
+ if(c.pl)line(P3.PL,'#5b687c',3);
+ if(hCond){line(P3.IN,S.inn?LITc:OFFc,3,[4,4]);
+ line([P3.AV,P3.HIS],S.his?LITc:PATHc,5);
+ line(P3.RB,S.rb?LITc:PATHc,4,c.blk==='R'?[5,5]:null);line(P3.LB,S.lb?LITc:PATHc,4,c.blk==='L'?[5,5]:null);
+ P3.PK.forEach(p=>line(p,S.pk?LITc:PATHc,2));
+ if(c.ap)line(P3.AP,S.ap?LITc:'#7a3fd0',6);}
+ if(c.pl)dotp(P3.PL[P3.PL.length-1],6,S.pt?LITc:'#5b687c');
+ if(hCond){dotp(P3.SA,7,S.sa?LITc:OFFc);dotp(P3.AV,7,S.av?LITc:OFFc);}
+ if(S.ec){dotp(S.ec.s3,9,'#ffd84a');const q=P2(S.ec.s3);x.strokeStyle='#d62b2b';x.lineWidth=3;x.beginPath();x.arc(q[0],q[1],9,0,7);x.stroke()}
+ if(c.blk&&hCond)txt('✕',c.blk==='L'?[22,36,6]:[-12,36,26],'#d62b2b',22);
+ if((c.avd||S.x)&&hCond)txt('✕',[10,-14,8],'#d62b2b',20,14,6);
+ if(S.sx&&hLab)txt('洞停止中',[-50,-74,30],'#d62b2b',13);
+ if(hView){const d=hView.d,o=[0,12,0],e=[o[0]+d[0]*96,o[1]+d[1]*84,o[2]+d[2]*96],t=[o[0]+d[0]*68,o[1]+d[1]*60,o[2]+d[2]*68],E=P2(e),Tq=P2(t);
+  x.strokeStyle='#1d5fd0';x.fillStyle='#1d5fd0';x.lineWidth=4;x.beginPath();x.moveTo(E[0],E[1]);x.lineTo(Tq[0],Tq[1]);x.stroke();
+  const ang=Math.atan2(Tq[1]-E[1],Tq[0]-E[0]),L2=Math.hypot(Tq[0]-E[0],Tq[1]-E[1]);
+  if(L2>6){x.beginPath();x.moveTo(Tq[0],Tq[1]);x.lineTo(Tq[0]-12*Math.cos(ang-.45),Tq[1]-12*Math.sin(ang-.45));x.lineTo(Tq[0]-12*Math.cos(ang+.45),Tq[1]-12*Math.sin(ang+.45));x.closePath();x.fill()}
+  x.beginPath();x.arc(E[0],E[1],11,0,7);x.fillStyle='#1d5fd0';x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+  x.font='900 12px "Noto Sans JP",sans-serif';x.textAlign='center';x.fillStyle='#fff';x.fillText('+',E[0],E[1]+4.5);
+  const lbl=hLab?hView.lab:'';if(lbl){x.font='700 11.5px "Noto Sans JP",sans-serif';const w=x.measureText(lbl).width;let lx=Math.max(w/2+4,Math.min(W-w/2-4,E[0])),ly=E[1]+(E[1]<Hh/2?-16:26);ly=Math.max(14,Math.min(Hh-6,ly));
+  x.fillStyle='rgba(255,255,255,.92)';x.fillRect(lx-w/2-4,ly-13,w+8,18);x.fillStyle='#1d5fd0';x.fillText(lbl,lx,ly)}x.textAlign='left'}
+ if(hLab){LAB3.forEach(l=>txt(l[0],l[1],'#5a3a3d',12));
+ if(hCond){txt('洞結節',P3.SA,'#5b687c',10.5,26,-6);txt('房室結節',P3.AV,'#5b687c',10.5,30,14);
+ if(c.ap)txt('副伝導路',P3.AP[1],'#5b687c',10.5,30,4);}}
+ x.font='700 12px "Noto Sans JP",sans-serif';x.textAlign='left';x.fillStyle='#7d8a9c';
+ const fr=Math.cos(hRot.y)>0;x.fillText(fr?'患者の右':'患者の左',8,16);x.textAlign='right';x.fillText(fr?'患者の左':'患者の右',W-8,16);x.textAlign='left'}
+function bind3D(cv){let px=0,py=0;
+ cv.onpointerdown=e=>{hRot.drag=true;hRot.auto=false;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId)};
+ cv.onpointermove=e=>{if(!hRot.drag)return;hRot.y+=(e.clientX-px)*.012;hRot.x=Math.max(-1.2,Math.min(1.2,hRot.x+(e.clientY-py)*.012));px=e.clientX;py=e.clientY};
+ cv.onpointerup=cv.onpointercancel=()=>{hRot.drag=false}}
+function heartRun(c,s,root,cv,mini){
+ cancelAnimationFrame(hAnim);
+ const ev=s.ev.slice().sort((a,b)=>a.t-b.t),A=ev.filter(e=>e.k==='A'),V=ev.filter(e=>e.k==='V');
+ A.forEach(a=>{a.blk=!V.some(v=>v.t>a.t&&v.t<=a.t+.45)});
+ const cu=[document.getElementById('cu0'),document.getElementById('cu1')],h3=root.querySelector('#h3');
+ if(h3)bind3D(h3);
+ let tPrev=performance.now();
+ const frame=n=>{
+  const tt=(((n-hT0)/1000*hSpeed)%DUR+DUR)%DUR,S=heartState(c,A,V,tt);
+  if(hRot.auto&&!hRot.drag)hRot.y=-.35+.45*Math.sin((n/1000)*.35);
+  if(h3)draw3D(h3,c,S);else apply2D(root,S);
+  if(mini&&mini.cv)miniDraw(mini.cv,mini.pr,tt,mini.lab,mini.hr);
+  if(cv&&cv._g&&cu[0]&&cu[1]){const g=cv._g;cu[1].style.display='block';cu[1].style.left=(tt/DUR*g.W)+'px';cu[1].style.top=g.h0+'px';cu[1].style.height=g.h1+'px';
+   if(tt<4){cu[0].style.display='block';cu[0].style.left=(tt/4*g.W)+'px';cu[0].style.top='0px';cu[0].style.height=g.h0+'px'}else cu[0].style.display='none'}
+  hAnim=requestAnimationFrame(frame)};
+ hAnim=requestAnimationFrame(frame)}
+
+const app=document.getElementById('app');
+let Q=null;
+function home(){cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
+ app.innerHTML=`<div class="card"><h2>3点モニターで不整脈を見抜く練習</h2>
+ <p class="mut" style="margin:0 0 10px">症例に合わせて電極を貼る → その貼り方で見える波形がその場で出る → 何の波形か当てる。全${C.length}波形。間違った場所に貼ると、その位置から見た波形（反転・形の変化）が出ます。</p>
+ <div class="row"><button class="btn pri" data-go="10">10問チャレンジ</button><button class="btn pri" data-go="all">全${C.length}問</button></div>
+ <div class="row" style="margin-top:8px"><button class="btn" id="lib">波形図鑑を見る（12誘導・心臓の動き）</button></div></div>
+ <div class="card"><h2>貼り方のおさらい（設定Ⅱ）</h2><ul class="pts">
+ <li><b>標準貼り（Ⅱ誘導）</b>：赤＝右鎖骨下／黄＝左鎖骨下／緑＝左下腹部</li>
+ <li><b>CM法</b>：赤＝胸骨柄／黄＝右鎖骨下／緑＝見たい胸部誘導の位置</li>
+ <li>緑（＋）が「カメラ」。調律はⅡ、脚ブロックはCM1、前壁はCM2〜4、虚血の感度最高はCM5</li><li>右室梗塞はCM4R（緑を右第5肋間鎖骨中線）。後壁はCM1〜3のミラーイメージ（ST低下＋R波増高）で判断</li></ul>
+ <div class="sm">波形は学習用のシミュレーションです。心臓の電気の向きと電極の位置から計算していますが、実際の心電図とは細部が異なります。</div></div>`;
+ app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>start(b.dataset.go==='all'?shuf(C):shuf(C).slice(0,10)));
+ app.querySelector('#lib').onclick=lib}
+function start(list,m12){cancelAnimationFrame(hAnim);Q={list,i:0,dOK:0,pOK:0,aOK:0,wrong:[],m12:!!m12};nextQ()}
+function nextQ(){const c=Q.list[Q.i];Object.assign(Q,{c,s:sig(c),st:{pl:Object.assign({},STD_PL.II),set:'II',cc:'g'},ans:null,op:opts(c),shown:false,act:null,aop:actOpts(c)});Q.m12?renderQ12():renderQ();window.scrollTo(0,0)}
+function renderQ(){
+ const c=Q.c,n=Q.list.length,y=window.scrollY;
+ let h=`<div class="mut">第${Q.i+1}問 ／ ${n}問</div><div class="prog"><i style="width:${Q.i/n*100}%"></i></div>
+ <div class="card"><span class="tag">症例</span><div class="sc">${c.sc}</div></div>
+ <div class="card" id="pn"><h2>電極を貼る</h2>${panelHTML(Q.st)}</div>
+ <div class="card">${hrHTML(c,Q.s)}<div class="paper"><canvas id="cv"></canvas></div><div class="sm">上段：小さいマス＝0.04秒・0.1mV／大きいマス＝0.2秒・0.5mV<br>下段：15秒全体を縮小（縦線＝1秒・太線＝5秒、青い部分＝上段の範囲）</div>
+ <div class="row" style="margin-top:6px"><button class="btn" id="rep">もう一度流す</button></div></div>
+ <div class="card"><h2>この波形は？</h2>`;
+ Q.op.forEach((o,k)=>{let cl='';if(Q.ans){if(o===c)cl='ok';else if(o===Q.ans)cl='ng'}h+=`<button class="ch ${cl}" data-k="${k}" ${Q.ans?'disabled':''}>${Q.ans?(o===c?'○ ':o===Q.ans?'✕ ':''):''}${o.n}</button>`});
+ if(Q.ans){const pk=Q.ansPl;h+=`<div class="fb ${Q.ans===c?'ok':'ng'}"><b class="big">${Q.ans===c?'○ 正解':'✕ 不正解'}：${c.n}</b><div class="sm"><b>回答時の貼り方：</b>${pk.lab} → ${pk.ok?'<span style="color:var(--ok);font-weight:700">おすすめの貼り方でした</span>':'<span style="color:var(--ng);font-weight:700">おすすめとは違う貼り方でした</span>'}</div></div>
+<div class="fb ${Q.ans===c?'ok':'ng'}" style="margin-top:8px">${featHTML(c)}</div><div class="row" style="margin-top:12px"><button class="btn pri" id="nx">${Q.i+1<n?'次の問題へ':'結果を見る'}</button></div>`;}
+ h+='</div>';
+ app.innerHTML=h;window.scrollTo(0,y);
+ const lab=stripFor(Q.st,Q.s,'cv',!Q.shown);Q.shown=true;Q.lab=lab;
+ app.querySelector('#rep').onclick=()=>stripFor(Q.st,Q.s,'cv',true);
+ bindPanel(app.querySelector('#pn'),Q.st,renderQ);
+ app.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(Q.ans)return;Q.ans=Q.op[+b.dataset.k];const got=cfg(Q.st.pl,Q.st.set),ok=!!got&&c.acc.includes(got);Q.ansPl={lab:Q.lab,ok};if(ok)Q.pOK++;if(Q.ans===c)Q.dOK++;if(Q.ans!==c||!ok)Q.wrong.push(c);renderQ()});
+ app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{if(Q.act)return;Q.act=b.dataset.a;if(Q.act===ACTMAP[c.id])Q.aOK++;else if(!Q.wrong.includes(c))Q.wrong.push(c);renderQ()});
+ const nx=app.querySelector('#nx');if(nx)nx.onclick=()=>{Q.i++;if(Q.i<Q.list.length)nextQ();else result()}}
+let cur12=null,cur12Sel=null;
+function renderQ12(){
+ const c=Q.c,n=Q.list.length,y=window.scrollY;
+ let h=`<div class="mut">12誘導クイズ　第${Q.i+1}問 ／ ${n}問</div><div class="prog"><i style="width:${Q.i/n*100}%"></i></div>
+ <div class="card"><span class="tag">症例</span><div class="sc">${c.sc}</div></div>
+ <div class="card">${hrHTML(c,Q.s)}<div class="paper"><canvas id="c12"></canvas></div><div class="sm">各誘導0〜2.5秒（12誘導とも同じ時間帯）／最下段：Ⅱ誘導0〜10秒。小さいマス＝0.04秒・0.1mV</div>${ref12HTML()}</div>
+ <div class="card"><h2>この12誘導は？</h2>`;
+ Q.op.forEach((o,k)=>{let cl='';if(Q.ans){if(o===c)cl='ok';else if(o===Q.ans)cl='ng'}h+=`<button class="ch ${cl}" data-k="${k}" ${Q.ans?'disabled':''}>${Q.ans?(o===c?'○ ':o===Q.ans?'✕ ':''):''}${o.n}</button>`});
+ if(Q.ans)h+=`<div class="fb ${Q.ans===c?'ok':'ng'}"><b class="big">${Q.ans===c?'○ 正解':'✕ 不正解'}：${c.n}</b><ul class="pts">${c.pts.map(p=>`<li>${p}</li>`).join('')}</ul></div><div class="row" style="margin-top:12px"><button class="btn pri" id="nx">${Q.i+1<n?'次の問題へ':'結果を見る'}</button></div>`;
+ app.innerHTML=h+'</div>';window.scrollTo(0,y);
+ cur=null;cur12=Q.s;cur12Sel=null;draw12(document.getElementById('c12'),Q.s);
+ app.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(Q.ans)return;Q.ans=Q.op[+b.dataset.k];if(Q.ans===c)Q.dOK++;else Q.wrong.push(c);renderQ12()});
+ const nx=app.querySelector('#nx');if(nx)nx.onclick=()=>{Q.i++;if(Q.i<Q.list.length)nextQ();else result()}}
+function result(){cur=null;const n=Q.list.length;
+ app.innerHTML=`<div class="card"><h2>結果</h2><div class="row" style="gap:20px"><div><div class="mut">波形の判定</div><div class="big">${Q.dOK}<span style="font-size:20px"> / ${n}</span></div></div>${Q.m12?'':`<div><div class="mut">貼り方（回答時）</div><div class="big">${Q.pOK}<span style="font-size:20px"> / ${n}</span></div></div>`}</div></div>
+ ${Q.wrong.length?`<div class="card"><h2>復習したい問題</h2><div class="lib">${Q.wrong.map(c=>`<button class="btn" data-id="${c.id}">${c.n}</button>`).join('')}</div><div class="row" style="margin-top:10px"><button class="btn pri" id="rw">この問題だけ解き直す</button></div></div>`:`<div class="card"><h2>全問正解！</h2><p class="mut" style="margin:0">次は全${C.length}問に挑戦してみましょう。</p></div>`}
+ <div class="row"><button class="btn pri" id="ag">もう一度（10問）</button><button class="btn" id="hm">ホームへ</button></div>`;
+ const w=Q.wrong.slice();
+ app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(C.find(x=>x.id===b.dataset.id)));
+ const m12=Q.m12,rw=app.querySelector('#rw');if(rw)rw.onclick=()=>start(shuf(w),m12);
+ app.querySelector('#ag').onclick=()=>start(shuf(C).slice(0,10),m12);app.querySelector('#hm').onclick=home;window.scrollTo(0,0)}
+function lib(){cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
+ let h=`<div class="card"><h2>波形図鑑（全${C.length}）</h2><p class="mut" style="margin:0">タップで波形と特徴を表示。電極を動かして見え方の違いも確認できます。</p>`;
+ for(const k in CATS)h+=`<div class="cat">${CATS[k]}</div><div class="lib">${C.filter(c=>c.cat===k).map(c=>`<button class="btn" data-id="${c.id}">${c.n}</button>`).join('')}</div>`;
+ app.innerHTML=h+'</div>';app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(C.find(x=>x.id===b.dataset.id)));window.scrollTo(0,0)}
+const K12=['I','II','III','aVR','aVL','aVF','V1','V2','V3','V4','V5','V6'];
+const VREG12={I:['Ⅰ誘導','高位側壁',[.85,-.45,.1]],II:['Ⅱ誘導','下壁',[0,1,.1]],III:['Ⅲ誘導','下壁（やや右）',[-.35,.94,.05]],aVR:['aVR誘導','心臓の右上方（広範な虚血の目安）',[-.7,-.7,.1]],aVL:['aVL誘導','高位側壁',[.87,-.5,.05]],aVF:['aVF誘導','下壁',[0,1,.05]],
+ V1:['V1誘導','中隔・右室',[-.45,.1,.9]],V2:['V2誘導','前壁中隔',[-.05,.1,1]],V3:['V3誘導','前壁',[.3,.15,.95]],V4:['V4誘導','前壁・心尖部',[.45,.45,.8]],V5:['V5誘導','前側壁',[.75,.2,.6]],V6:['V6誘導','側壁',[.95,.1,.25]],V4R:['V4R誘導（右側胸部）','右室',[-.85,.3,.45]],V7:['V7誘導（背部）','後壁',[.55,.2,-.8]],V8:['V8誘導（背部）','後壁',[.25,.2,-.95]],V9:['V9誘導（背部）','後壁（中央寄り）',[0,.2,-1]]};
+const view12=k=>{const v=VREG12[k];return{key:/^V\d$/.test(k)?'CM'+k[1]:k==='V4R'?'CM4R':k,lab:v[0],area:v[1],d:nz(v[2])}};
+const kLab=k=>k==='I'?'Ⅰ':k==='II'?'Ⅱ':k==='III'?'Ⅲ':k;
+function detail(c){hRot.auto=true;const s=sig(c);hT0=performance.now();
+ let hKey=c.lead==='II'?'II':c.lead==='CM4R'?'III':'V'+c.lead[2];
+ const hcHTML=()=>{hView=view12(hKey);return `<h2>心臓の動き（シミュレーション）</h2>
+  <div class="fb" style="margin:0 0 8px;background:light-dark(#e8f0fd,#15264a);border:1.5px solid #1d5fd0"><b>今見ている誘導：</b>${hView.lab}<br><b>見ている範囲：</b>${hView.area}${leadFigHTML(hView)}</div>
+  <canvas id="mini" style="width:100%;height:104px;display:block;border-radius:8px;margin-bottom:10px" aria-label="ミニ心電図モニター"></canvas>
+  <div class="seg" style="margin-bottom:8px">${[['3d','立体'],['2d','平面']].map(m=>`<button data-hm="${m[0]}" class="${hMode===m[0]?'on':''}">${m[1]}</button>`).join('')}${hMode==='3d'?'<button id="front">正面に戻す</button>':''}</div><div class="mut" style="margin:0 0 4px">表示する項目（タップで表示／非表示）</div><div class="seg" style="margin-bottom:8px"><button id="corbtn" class="${hCor?'on':''}" aria-pressed="${hCor}">冠動脈</button><button id="cdbtn" class="${hCond?'on':''}" aria-pressed="${hCond}">刺激伝導系</button><button id="lbbtn" class="${hLab?'on':''}" aria-pressed="${hLab}">文字</button></div>
+  <div class="hwrap"><div>${hMode==='3d'?'<canvas id="h3" style="width:100%;height:min(76vw,380px);display:block;touch-action:none;cursor:grab" aria-label="心臓の立体モデル。ドラッグで回転"></canvas>':`<div class="heart ${hCond?'':'nocd'} ${hLab?'':'nolb'}">${heartSVG(c)}</div>`}</div>
+  <div class="lsel" role="group" aria-label="誘導の切り替え"><div class="t" style="grid-column:auto">肢</div><div class="t" style="grid-column:auto">胸部</div>${['I','V1','II','V2','III','V3','aVR','V4','aVL','V5','aVF','V6'].map(k=>`<button data-k12="${k}" class="${hKey===k?'on':''}">${kLab(k)}</button>`).join('')}</div></div>
+  ${hMode==='3d'?'<div class="sm" style="text-align:center;margin-top:0">心臓は指でドラッグすると回転／右のボタンで誘導を切り替え</div>':'<div class="sm" style="text-align:center;margin-top:0">右のボタンで誘導を切り替え</div>'}
+  <div class="leg"><span><span class="dot" style="background:#ffd84a"></span>興奮（脱分極）</span><span><span class="dot" style="background:#ff9f1a"></span>刺激伝導系を伝わる電気</span><span><span class="dot" style="background:#4f86e8"></span>今の誘導が見ている範囲</span><span><span class="dot" style="background:#c8202c"></span>冠動脈（白い点＝血流）</span>${c.zone?'<span><span class="dot" style="background:#c0303a"></span>虚血部位（イメージ）</span>':''}</div>
+  <div class="mut" style="margin:8px 0 4px">再生速度</div><div class="seg">${[1,.5,.25].map(k=>`<button data-sp="${k}" class="${hSpeed===k?'on':''}">${k===1?'等速':k+'倍'}</button>`).join('')}</div>
+  ${c.cor?`<div class="fb ng" style="margin-top:8px"><b>責任冠動脈：</b>${CORN[c.cor[0]]}${c.cor[1]==='prox'?'の近位部':c.cor[1]==='dist'?'の遠位部':''}が${c.cor[1]==='sten'?'狭くなり（狭窄）、心筋への血流が足りない状態':c.cor[1]==='old'?'閉塞したあとの状態（梗塞後）':'閉塞'}。${c.cor[1]==='sten'?'':'✕より先の血管（灰色の点線）に血液が流れていません。'}</div>`:''}
+  <div class="sm">黄色く光る＝電気的な興奮、少し縮む＝収縮。刺激伝導系と冠動脈は心臓を透かして表示しています。模式図なので、実際の形・走行・大きさとは異なります。</div>`};
+ app.innerHTML=`<div class="card"><span class="tag">${CATS[c.cat]||'その他の病気（クイズ専用）'}</span><h2 style="font-size:20px;margin:0">${c.n}</h2></div>
+  <div class="card"><h2>12誘導</h2>${hrHTML(c,s)}<div class="paper"><canvas id="c12" style="cursor:pointer"></canvas></div><div class="sm">各誘導0〜2.5秒（同じ時間帯）／最下段：Ⅱ誘導0〜10秒。<b>誘導をタップ</b>すると、下の心臓シミュレーションがその誘導に切り替わります（青枠＝選択中）。</div>${ref12HTML()}</div>
+  <div class="card" id="hc"></div>
+  <div class="card"><h2>特徴</h2>${featHTML(c)}<div class="sm"><b>例：</b>${c.sc}</div><div class="row" style="margin-top:12px"><button class="btn pri" id="bk">図鑑に戻る</button></div></div>`;
+ cur=null;
+ const c12=document.getElementById('c12'),hc=document.getElementById('hc');
+ const paint12=()=>{cur12=s;cur12Sel=hKey;draw12(c12,s,hKey)};
+ /* 心臓カードだけを描き直す（ページ全体は作り直さないのでスクロール位置が動かない） */
+ const drawHeart=(anchor)=>{const el=anchor&&document.querySelector(anchor),y0=el?el.getBoundingClientRect().top:null;
+  hc.innerHTML=hcHTML();
+  heartRun(c,s,hc,null,{cv:hc.querySelector('#mini'),pr:proj(s,L12[hKey]),lab:hView.lab,hr:hrOf(c,s)});
+  hc.querySelectorAll('[data-k12]').forEach(b=>b.onclick=()=>{hKey=b.dataset.k12;paint12();drawHeart('[data-k12="'+hKey+'"]')});
+  hc.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const now=performance.now(),tt=((now-hT0)/1000*hSpeed)%DUR;hSpeed=+b.dataset.sp;hT0=now-tt*1000/hSpeed;drawHeart('[data-sp="'+b.dataset.sp+'"]')});
+  hc.querySelectorAll('[data-hm]').forEach(b=>b.onclick=()=>{hMode=b.dataset.hm;drawHeart('[data-hm="'+hMode+'"]')});
+  hc.querySelector('#corbtn').onclick=()=>{hCor=!hCor;drawHeart('#corbtn')};hc.querySelector('#cdbtn').onclick=()=>{hCond=!hCond;drawHeart('#cdbtn')};hc.querySelector('#lbbtn').onclick=()=>{hLab=!hLab;drawHeart('#lbbtn')};
+  const fb=hc.querySelector('#front');if(fb)fb.onclick=()=>{hRot.y=0;hRot.x=0;hRot.auto=false};
+  if(y0!==null){const el2=document.querySelector(anchor);if(el2)window.scrollBy(0,el2.getBoundingClientRect().top-y0)}};
+ paint12();
+ c12.onclick=e=>{const g=c12._g12;if(!g)return;const r=c12.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,row=Math.floor(py/g.rh);if(row<0||row>5)return;hKey=(px<g.cw?LIMB:CHEST)[row];paint12();drawHeart('#c12')};
+ drawHeart(null);
+ app.querySelector('#bk').onclick=lib;
+ window.scrollTo(0,0)}
+document.getElementById('home').onclick=home;
+home();
+}
+</script></body></html>
