@@ -531,7 +531,7 @@ function ref12HTML(){return `<details style="margin-top:8px"><summary style="fon
  <div class="sm">四肢：右手＝赤／左手＝黄／左足＝緑／右足＝黒（アース）<br>胸部：V1赤・V2黄・V3緑・V4茶・V5黒・V6紫<br>V1：第4肋間胸骨右縁／V2：第4肋間胸骨左縁／V3：V2とV4の中点／V4：第5肋間左鎖骨中線／V5：V4の高さ前腋窩線／V6：V4の高さ中腋窩線</div>${AREA12}</details>`}
 
 /* ---- 今見ている誘導（視点） ---- */
-const VREG={I:['Ⅰ誘導','高位側壁',[.85,-.45,.1]],II:['Ⅱ誘導','下壁',[0,1,.1]],III:['Ⅲ誘導','下壁（やや右）',[-.35,.94,.05]],aVR:['aVR相当','心臓の右上方（広範な虚血の目安）',[-.7,-.7,.1]],
+const VREG={I:['Ⅰ誘導','高位側壁',[1,0,.05]],II:['Ⅱ誘導','下壁',[.5,.87,.05]],III:['Ⅲ誘導','下壁（やや右）',[-.5,.87,.05]],aVR:['aVR相当','心臓の右上方（広範な虚血の目安）',[-.7,-.7,.1]],
  CM1:['CM1（V1相当）','中隔・右室',[-.45,.1,.9]],CM2:['CM2（V2相当）','前壁中隔',[-.05,.1,1]],CM3:['CM3（V3相当）','前壁',[.3,.15,.95]],CM4:['CM4（V4相当）','前壁・心尖部',[.45,.45,.8]],CM5:['CM5（V5相当）','前側壁',[.75,.2,.6]],CM6:['CM6（V6相当）','側壁',[.95,.1,.25]],CM4R:['CM4R（V4R相当）','右室',[-.85,.3,.45]]};
 function viewOf(st){const p=pair(st.pl,st.set);if(!p)return null;const k=p[0]+'|'+p[1];
  const key={'LSC|RSC':'I','LLA|RSC':'II','LLA|LSC':'III','RSC|LLA':'aVR'}[k]||(p[1]==='MAN'&&/^CM/.test(p[0])?p[0]:null);
@@ -986,7 +986,7 @@ function draw3DGL(cv,c,S){
   dotp(G.LVlat,7,'#b01818');if(hLab){txt('破裂',G.LVlat,'#b01818',11.5,0,-12);const qq=P2(G.VEN);x.font='700 10.5px "Noto Sans JP",sans-serif';x.fillStyle='#8a1a22';x.textAlign='center';x.fillText('心膜腔にたまった血液（心タンポナーデ）',W/2,34,W-16);x.textAlign='left'}}
  if(hSee&&hLab){[['僧帽弁',G.MV,c.valve&&c.valve.MV],['三尖弁',G.TV,c.valve&&c.valve.TV],['大動脈弁',G.AOV,c.valve&&c.valve.AOV]].forEach(([t,p,on])=>{if(on||c.valve)txt(t,p,on?'#6a2a9a':'#5b687c',10,0,14)})}
  /* 今見ている誘導の視点 */
- if(hView){const d=hView.d,o=G.VEN,e=[o[0]+d[0]*78,o[1]+d[1]*56,o[2]+d[2]*78],t=[o[0]+d[0]*56,o[1]+d[1]*40,o[2]+d[2]*56],E=P2(e),Tq=P2(t);
+ if(hView){const d=hView.d,o=G.VEN,e=[o[0]+d[0]*78,o[1]+d[1]*56,o[2]+d[2]*44],t=[o[0]+d[0]*56,o[1]+d[1]*40,o[2]+d[2]*30],E=P2(e),Tq=P2(t);{const ddx=Math.max(16,Math.min(W-16,E[0]))-E[0],ddy=Math.max(16,Math.min(Hh-34,E[1]))-E[1];E[0]+=ddx;E[1]+=ddy;Tq[0]+=ddx;Tq[1]+=ddy}
   x.strokeStyle='#1d5fd0';x.fillStyle='#1d5fd0';x.lineWidth=4;x.beginPath();x.moveTo(E[0],E[1]);x.lineTo(Tq[0],Tq[1]);x.stroke();
   const ang=Math.atan2(Tq[1]-E[1],Tq[0]-E[0]);if(Math.hypot(Tq[0]-E[0],Tq[1]-E[1])>6){x.beginPath();x.moveTo(Tq[0],Tq[1]);x.lineTo(Tq[0]-12*Math.cos(ang-.45),Tq[1]-12*Math.sin(ang-.45));x.lineTo(Tq[0]-12*Math.cos(ang+.45),Tq[1]-12*Math.sin(ang+.45));x.closePath();x.fill()}
   x.beginPath();x.arc(E[0],E[1],11,0,7);x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();x.font='900 12px "Noto Sans JP",sans-serif';x.textAlign='center';x.fillStyle='#fff';x.fillText('+',E[0],E[1]+4.5);
@@ -1153,8 +1153,8 @@ function lib(){document.body.classList.remove('homeview');cur=null;cancelAnimati
  for(const k in CATS)h+=`<div class="cat">${CATS[k]}</div><div class="lib">${C.filter(c=>c.cat===k).map(c=>`<button class="btn" data-id="${c.id}">${c.n}</button>`).join('')}</div>`;
  app.innerHTML=h+'</div>';app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(C.find(x=>x.id===b.dataset.id)));window.scrollTo(0,0)}
 const K12=['I','II','III','aVR','aVL','aVF','V1','V2','V3','V4','V5','V6'];
-const VREG12={I:['Ⅰ誘導','高位側壁',[.85,-.45,.1]],II:['Ⅱ誘導','下壁',[0,1,.1]],III:['Ⅲ誘導','下壁（やや右）',[-.35,.94,.05]],aVR:['aVR誘導','心臓の右上方（広範な虚血の目安）',[-.7,-.7,.1]],aVL:['aVL誘導','高位側壁',[.87,-.5,.05]],aVF:['aVF誘導','下壁',[0,1,.05]],
- V1:['V1誘導','中隔・右室',[-.45,.1,.9]],V2:['V2誘導','前壁中隔',[-.05,.1,1]],V3:['V3誘導','前壁',[.3,.15,.95]],V4:['V4誘導','前壁・心尖部',[.45,.45,.8]],V5:['V5誘導','前側壁',[.75,.2,.6]],V6:['V6誘導','側壁',[.95,.1,.25]],V4R:['V4R誘導（右側胸部）','右室',[-.85,.3,.45]],V7:['V7誘導（背部）','後壁',[.55,.2,-.8]],V8:['V8誘導（背部）','後壁',[.25,.2,-.95]],V9:['V9誘導（背部）','後壁（中央寄り）',[0,.2,-1]]};
+const VREG12={I:['Ⅰ誘導','高位側壁',[1,0,.05]],II:['Ⅱ誘導','下壁',[.5,.87,.05]],III:['Ⅲ誘導','下壁（やや右）',[-.5,.87,.05]],aVR:['aVR誘導','心臓の右上方（広範な虚血の目安）',[-.87,-.5,.05]],aVL:['aVL誘導','高位側壁',[.87,-.5,.05]],aVF:['aVF誘導','下壁',[0,1,.05]],
+ V1:['V1誘導','中隔・右室',[-.45,.1,.9]],V2:['V2誘導','前壁中隔',[-.05,.1,1]],V3:['V3誘導','前壁',[.3,.15,.95]],V4:['V4誘導','前壁・心尖部',[.5,.3,.82]],V5:['V5誘導','前側壁',[.85,.2,.5]],V6:['V6誘導','側壁',[.97,.15,.15]],V4R:['V4R誘導（右側胸部）','右室',[-.85,.3,.45]],V7:['V7誘導（背部）','後壁',[.55,.2,-.8]],V8:['V8誘導（背部）','後壁',[.25,.2,-.95]],V9:['V9誘導（背部）','後壁（中央寄り）',[0,.2,-1]]};
 const view12=k=>{const v=VREG12[k];return{key:/^V\d$/.test(k)?'CM'+k[1]:k==='V4R'?'CM4R':k,lab:v[0],area:v[1],d:nz(v[2])}};
 const kLab=k=>k==='I'?'Ⅰ':k==='II'?'Ⅱ':k==='III'?'Ⅲ':k;
 function detail(c){hRot.auto=false;hRot.y=-.45;hRot.x=-.4;hSee=!!(c.valve||c.mech);if(c.valve&&!c.mech){hCor=false;hCond=false;hRot.auto=false;hRot.y=2.4;hRot.x=-.4}else if(c.mech==='pmr'){hCond=false;hRot.auto=false;hRot.y=-1.1;hRot.x=-.3}else{hCor=true;hCond=true}const s=sig(c);hT0=performance.now();
