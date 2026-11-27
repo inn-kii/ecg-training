@@ -820,9 +820,9 @@ function draw3D(cv,c,S){if(hglInit())return draw3DGL(cv,c,S);
  x.font='700 12px "Noto Sans JP",sans-serif';x.textAlign='left';x.fillStyle='#7d8a9c';
  const fr=Math.cos(hRot.y)>0;x.fillText(fr?'患者の右':'患者の左',8,16);x.textAlign='right';x.fillText(fr?'患者の左':'患者の右',W-8,16);x.textAlign='left'}
 function bind3D(cv){let px=0,py=0;
- cv.onpointerdown=e=>{hRot.drag=true;hRot.auto=false;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId)};
+ cv.onpointerdown=e=>{hRot.drag=true;hRot.auto=false;px=e.clientX;py=e.clientY;cv._tp={x:e.clientX,y:e.clientY,t:performance.now()};cv.setPointerCapture(e.pointerId)};
  cv.onpointermove=e=>{if(!hRot.drag)return;hRot.y+=(e.clientX-px)*.012;hRot.x=Math.max(-1.55,Math.min(1.55,hRot.x+(e.clientY-py)*.012));px=e.clientX;py=e.clientY};
- cv.onpointerup=cv.onpointercancel=()=>{hRot.drag=false};if(!cv._tb){cv._tb=1;const pv=e=>{if(e.cancelable)e.preventDefault()};cv.addEventListener('touchstart',pv,{passive:false});cv.addEventListener('touchmove',pv,{passive:false})}}
+ cv.onpointercancel=()=>{hRot.drag=false};cv.onpointerup=e=>{hRot.drag=false;const t=cv._tp;if(t&&cv._onTap&&Math.hypot(e.clientX-t.x,e.clientY-t.y)<9&&performance.now()-t.t<500){const r=cv.getBoundingClientRect();cv._onTap(e.clientX-r.left,e.clientY-r.top)}};if(!cv._tb){cv._tb=1;const pv=e=>{if(e.cancelable)e.preventDefault()};cv.addEventListener('touchstart',pv,{passive:false});cv.addEventListener('touchmove',pv,{passive:false})}}
 function heartRun(c,s,root,cv,mini){
  cancelAnimationFrame(hAnim);
  const ev=s.ev.slice().sort((a,b)=>a.t-b.t),A=ev.filter(e=>e.k==='A'),V=ev.filter(e=>e.k==='V');
@@ -847,7 +847,7 @@ const HGL={ok:false};
 function hglInit(){
  if(HGL.ok||HGL.fail)return HGL.ok;
  try{
-  const cv=document.createElement('canvas'),gl=cv.getContext('webgl',{antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:false});
+  const cv=document.createElement('canvas'),gl=cv.getContext('webgl',{antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:false,stencil:true});
   if(!gl||typeof HEART==='undefined'){HGL.fail=1;return false}
   const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer};
   const parts=HEART.map(p=>{const q=new Int16Array(b64(p.v)),idx=new Uint16Array(b64(p.i)),n=q.length/3,P=new Float32Array(n*3);for(let i=0;i<n*3;i++)P[i]=q[i]/10;
@@ -870,38 +870,49 @@ function hglInit(){
   // 心室の放射方向（梗塞部位・見ている範囲の判定用）
   parts.forEach(p=>{p.Rd=new Float32Array(p.nv*3);const c0=(p.c==='LA'||p.c==='RA')?G.ATR:G.VEN;for(let i=0;i<p.nv;i++){const d=nz([p.P[i*3]-c0[0],p.P[i*3+1]-c0[1],p.P[i*3+2]-c0[2]]);p.Rd[i*3]=d[0];p.Rd[i*3+1]=d[1];p.Rd[i*3+2]=d[2]}});
   const vs=`attribute vec3 aP;attribute vec3 aN;attribute vec3 aR;attribute float aZ;attribute float aD;
-uniform mat3 uR;uniform vec3 uC;uniform float uK;uniform vec3 uO;uniform vec4 uS;uniform float uOff;
-varying vec3 vN;varying vec3 vR;varying float vZ;varying float vD;
-void main(){vec3 p=uC+(aP-uC)*uK+uO;vec3 q=uR*p;float f=500.0/(500.0-q.z);
- gl_Position=vec4(q.x*uS.x*f/uS.y,-(q.y+uOff)*uS.x*f/uS.z,-q.z/300.0,1.0);vN=uR*aN;vR=aR;vZ=aZ;vD=aD;}`;
-  const fs=`precision mediump float;varying vec3 vN;varying vec3 vR;varying float vZ;varying float vD;
-uniform vec3 uCol;uniform vec3 uEx;uniform float uExK;uniform float uZoneOn;uniform vec3 uView;uniform float uViewOn;uniform float uArt;uniform float uDead;uniform float uT;uniform float uA;
-void main(){vec3 n=normalize(vN);if(n.z<0.0)n=-n;vec3 L=normalize(vec3(-0.45,-0.6,0.66));
+uniform mat3 uR;uniform vec3 uC;uniform float uK;uniform float uZK;uniform float uLift;uniform vec3 uO;uniform vec4 uS;uniform float uOff;
+varying vec3 vN;varying vec3 vR;varying float vZ;varying float vD;varying vec3 vP;varying float vQZ;
+void main(){float zk=aZ*uZK;float kk=uK-(1.0-uK)*0.22*step(0.01,uZK)*(1.0-aZ);kk=mix(kk,1.0,min(zk,1.0));vec3 p=uC+(aP-uC)*kk+aR*(max(zk-1.0,0.0)*(1.0-uK)*55.0+uLift)+uO;vP=aP;vec3 q=uR*p;float f=500.0/(500.0-q.z);
+ gl_Position=vec4(q.x*uS.x*f/uS.y,-(q.y+uOff)*uS.x*f/uS.z,-q.z/300.0,1.0);vN=uR*aN;vR=aR;vZ=aZ;vD=aD;vQZ=q.z;}`;
+  const fs=`#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec3 vN;varying vec3 vR;varying float vZ;varying float vD;varying vec3 vP;
+float hh(vec3 p){return fract(sin(dot(p,vec3(12.99,78.23,37.71)))*4375.85);}
+float vn(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(hh(i),hh(i+vec3(1,0,0)),f.x),mix(hh(i+vec3(0,1,0)),hh(i+vec3(1,1,0)),f.x),f.y),mix(mix(hh(i+vec3(0,0,1)),hh(i+vec3(1,0,1)),f.x),mix(hh(i+vec3(0,1,1)),hh(i+vec3(1,1,1)),f.x),f.y),f.z);}
+uniform vec3 uCol;uniform vec3 uEx;uniform float uExK;uniform float uZoneOn;uniform float uScar;varying float vQZ;uniform float uGZ;uniform vec3 uView;uniform float uViewOn;uniform float uArt;uniform float uDead;uniform float uT;uniform float uA;
+void main(){if(vQZ<uGZ)discard;vec3 n=normalize(vN);if(n.z<0.0)n=-n;vec3 L=normalize(vec3(-0.45,-0.6,0.66));
  float lam=0.4+0.6*max(dot(n,L),0.0);float sp=pow(max(dot(n,normalize(L+vec3(0.0,0.0,1.0))),0.0),28.0)*0.28;float rim=pow(1.0-n.z,2.0)*0.18;
  vec3 c=uCol;
- float zz=uZoneOn>0.5?smoothstep(0.05,0.5,vZ):0.0;
+ float zz=uZoneOn>0.01?smoothstep(0.02,0.55,vZ)*uZoneOn:0.0;float zc=uZoneOn>0.01?smoothstep(0.45,0.95,vZ):0.0;
  if(uViewOn>0.5){float v=smoothstep(0.45,0.9,dot(vR,uView));c=mix(c,vec3(0.32,0.52,0.92),v*0.5*(1.0-zz));}
- if(uZoneOn>0.5)c=mix(c,vec3(0.24,0.01,0.03),zz*0.92);
+ if(uZoneOn>0.01){float nn=vn(vP*0.11+3.1)*0.7+vn(vP*0.27+7.3)*0.3;vec3 hyp=vec3(0.66,0.13,0.16);vec3 core=mix(vec3(0.27,0.03,0.06),vec3(0.40,0.22,0.30),smoothstep(0.35,0.8,nn));vec3 ci=mix(mix(hyp,core,zc),vec3(0.84,0.76,0.72),uScar);c=mix(c,ci,zz*(0.75+0.2*zc));sp*=1.0-0.75*zz;}
  if(uArt>0.5){if(vD>uDead){c=vec3(0.48,0.51,0.56);}else{float s=fract(vD/26.0-uT*0.9);if(s<0.16)c=mix(c,vec3(1.0),0.75);}}
  c=mix(c,uEx,uExK*(1.0-zz*0.85));
  gl_FragColor=vec4(c*(lam-rim)+sp,uA);}`;
   const sh=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s};
   const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');
-  const loc={};['aP','aN','aR','aZ','aD'].forEach(a=>loc[a]=gl.getAttribLocation(pr,a));['uR','uC','uK','uO','uS','uOff','uCol','uEx','uExK','uZoneOn','uView','uViewOn','uArt','uDead','uT','uA'].forEach(u=>loc[u]=gl.getUniformLocation(pr,u));
+  const loc={};['aP','aN','aR','aZ','aD'].forEach(a=>loc[a]=gl.getAttribLocation(pr,a));['uR','uC','uK','uZK','uLift','uO','uS','uOff','uCol','uEx','uExK','uZoneOn','uScar','uGZ','uView','uViewOn','uArt','uDead','uT','uA'].forEach(u=>loc[u]=gl.getUniformLocation(pr,u));
   const buf=(arr,t)=>{const b=gl.createBuffer();gl.bindBuffer(t||gl.ARRAY_BUFFER,b);gl.bufferData(t||gl.ARRAY_BUFFER,arr,gl.STATIC_DRAW);return b};
   parts.forEach(p=>{p.bP=buf(p.P);p.bN=buf(p.N);p.bR=buf(p.Rd);p.Z=new Float32Array(p.nv);p.bZ=buf(p.Z);p.bD=buf(p.D||new Float32Array(p.nv));p.bI=buf(p.idx,gl.ELEMENT_ARRAY_BUFFER)});
   Object.assign(HGL,{ok:true,cv,gl,pr,loc,parts,G});
  }catch(e){HGL.fail=1;HGL.err=String(e);return false}
  return true}
-const HZ={ant:(l,r)=>l&&r[2]>.3,inf:(l,r,q)=>l?r[1]>.5:q[1]>.5,lat:(l,r)=>l&&r[0]>.55&&r[1]<.35,hlat:(l,r)=>l&&r[0]>.4&&r[1]<0,post:(l,r)=>l&&r[2]<-.45&&r[1]>-.3,sub:(l)=>l,
- rv:(l,r)=>!l||r[1]>.55,apex:(l,r,q,p)=>Math.hypot(p[0]-HGL.G.LVapex[0],p[1]-HGL.G.LVapex[1],p[2]-HGL.G.LVapex[2])<38,
- extant:(l,r,q)=>l?(r[2]>.15||r[0]>.55):(q[2]>.5&&q[0]>-.3),infpost:(l,r,q)=>l?(r[1]>.5||(r[2]<-.45&&r[1]>-.3)):q[1]>.5,lmt:(l)=>l};
-let hglLADx=null;function hglIsL(P){const G=HGL.G;if(!hglLADx){hglLADx={};const acc={};HGL.parts.forEach(q=>{if(q.s!=='LAD')return;for(let i=0;i<q.nv;i++){const k=Math.round(q.P[i*3+1]/4);(acc[k]=acc[k]||[]).push(q.P[i*3])}});for(const k in acc){const a=acc[k];hglLADx[k]=Math.max(...a)}}if(P[2]>G.VEN[2]-2){let k=Math.round(P[1]/4),t=0;while(hglLADx[k]===undefined&&t<30){k+=(k*4<G.VEN[1]?1:-1);t++}if(hglLADx[k]!==undefined)return P[0]>hglLADx[k]-1}return (P[0]-G.SEP[0])-0.3*(P[2]-G.SEP[2])>0}
+const SM=(a,b,v)=>{const t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t)},M1=v=>Math.min(1,v);
+const HZ={ant:(l,r)=>l*SM(.12,.45,r[2]),inf:(l,r,q)=>M1(l*SM(.35,.65,r[1])+(1-l)*SM(.35,.65,q[1])),lat:(l,r)=>l*SM(.38,.7,r[0])*(1-SM(.2,.5,r[1])),hlat:(l,r)=>l*SM(.25,.55,r[0])*(1-SM(-.15,.15,r[1])),
+ post:(l,r)=>l*(1-SM(-.62,-.3,r[2]))*SM(-.45,-.15,r[1]),sub:(l)=>l,rv:(l,r)=>M1((1-l)+l*SM(.4,.7,r[1])),
+ apex:(l,r,q,p)=>1-SM(24,46,Math.hypot(p[0]-HGL.G.LVapex[0],p[1]-HGL.G.LVapex[1],p[2]-HGL.G.LVapex[2])),
+ extant:(l,r,q)=>M1(l*Math.max(SM(-.05,.3,r[2]),SM(.4,.7,r[0]))+(1-l)*SM(.3,.65,q[2])*SM(-.45,-.15,q[0])),
+ infpost:(l,r,q)=>M1(l*Math.max(SM(.35,.65,r[1]),(1-SM(-.62,-.3,r[2]))*SM(-.45,-.15,r[1]))+(1-l)*SM(.35,.65,q[1])),lmt:(l)=>l};
+let hglLADx=null;function hglIsL(P){const G=HGL.G;if(!hglLADx){hglLADx={};const acc={};HGL.parts.forEach(q=>{if(q.s!=='LAD')return;for(let i=0;i<q.nv;i++){const k=Math.round(q.P[i*3+1]/4);(acc[k]=acc[k]||[]).push(q.P[i*3])}});for(const k in acc){const a=acc[k];hglLADx[k]=Math.max(...a)}}if(P[2]>G.VEN[2]-2){let k=Math.round(P[1]/4),t=0;while(hglLADx[k]===undefined&&t<30){k+=(k*4<G.VEN[1]?1:-1);t++}if(hglLADx[k]!==undefined)return SM(-6,4,P[0]-hglLADx[k])}return SM(-6,6,(P[0]-G.SEP[0])-0.3*(P[2]-G.SEP[2]))}
+const HWM={hat:.7,lmt:.75,q_tako:1.6,std:.4,cort:.5,extant:1.25,ste:1.1};
 let hglZone=null;
-function hglSetCase(c){if(!HGL.ok)return;const gl=HGL.gl,f=c.zone&&HZ[c.zone];if(hglZone===(c.zone||''))return;hglZone=c.zone||'';
- HGL.parts.forEach(p=>{if(p.c!=='LV'&&p.c!=='RV')return;for(let i=0;i<p.nv;i++){const P3=[p.P[i*3],p.P[i*3+1],p.P[i*3+2]],G=HGL.G;p.Z[i]=f&&f(p.c==='LV'||hglIsL(P3),nz([P3[0]-G.LV[0],P3[1]-G.LV[1],P3[2]-G.LV[2]]),[p.Rd[i*3],p.Rd[i*3+1],p.Rd[i*3+2]],P3)?1:0}gl.bindBuffer(gl.ARRAY_BUFFER,p.bZ);gl.bufferData(gl.ARRAY_BUFFER,p.Z,gl.STATIC_DRAW)})}
+function hglSetCase(c){if(!HGL.ok)return;const gl=HGL.gl,f=c.zone&&HZ[c.zone],zkey=c.zkey||c.zone||'';if(hglZone===zkey)return;hglZone=zkey;
+ HGL.parts.forEach(p=>{if(p.c!=='LV'&&p.c!=='RV'&&p.c!=='ART')return;for(let i=0;i<p.nv;i++){const P3=[p.P[i*3],p.P[i*3+1],p.P[i*3+2]],G=HGL.G;p.Z[i]=c.zfn?c.zfn(p,i):!f?0:+f(p.c==='LV'?1:hglIsL(P3),nz([P3[0]-G.LV[0],P3[1]-G.LV[1],P3[2]-G.LV[2]]),[p.Rd[i*3],p.Rd[i*3+1],p.Rd[i*3+2]],P3)}gl.bindBuffer(gl.ARRAY_BUFFER,p.bZ);gl.bufferData(gl.ARRAY_BUFFER,p.Z,gl.STATIC_DRAW)})}
 /* 閉塞の位置（起始部からの距離mm） */
-function hglDead(c){if(!c.cor)return null;const G=HGL.G,[a,t]=c.cor;let lm=0;HGL.parts.forEach(p=>{if(p.s==='LMT')for(let i=0;i<p.nv;i++)lm=Math.max(lm,p.D[i])});
+function hglDead(c){if(c.occ)return c.occ;if(!c.cor)return null;const G=HGL.G,[a,t]=c.cor;let lm=0;HGL.parts.forEach(p=>{if(p.s==='LMT')for(let i=0;i<p.nv;i++)lm=Math.max(lm,p.D[i])});
  const T={LAD:{occ:lm+7,old:lm+7,prox:lm+3,sten:lm+38,dist:G.maxD.LAD*.62},RCA:{prox:10,mid:G.maxD.RCA*.42,dist:G.maxD.RCA*.72},LCX:{occ:lm+16},DG:{occ:lm+30},LMT:{occ:lm*.5}};
  const d=(T[a]||{})[t];if(d===undefined)return null;const sys=a==='LMT'?['LMT','LAD','DG','LCX']:a==='LAD'?['LAD','DG']:[a];return{a,t,d,sys,sten:t==='sten'}}
 function hglPoint(sysArr,d){let best=null,bd=1e9;HGL.parts.forEach(p=>{if(p.c!=='ART'||!sysArr.includes(p.s))return;for(let i=0;i<p.nv;i++){const e=Math.abs(p.D[i]-d);if(e<bd){bd=e;best=[p.P[i*3],p.P[i*3+1],p.P[i*3+2]]}}});return best}
@@ -910,8 +921,8 @@ function hglDraw(glcv,c,S,W,H,sc,off){
  if(glcv.width!==Math.round(W*dpr)||glcv.height!==Math.round(H*dpr)){glcv.width=Math.round(W*dpr);glcv.height=Math.round(H*dpr)}
  const g2=glcv.getContext('2d');
  gl.canvas.width=glcv.width;gl.canvas.height=glcv.height;gl.viewport(0,0,glcv.width,glcv.height);
- gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
- gl.useProgram(HGL.pr);
+ gl.clearColor(0,0,0,0);gl.clearStencil(0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT|gl.STENCIL_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+ gl.useProgram(HGL.pr);gl.uniform1f(HGL.loc.uGZ,-1e4);
  const cy=Math.cos(hRot.y),sy=Math.sin(hRot.y),cx=Math.cos(hRot.x),sx=Math.sin(hRot.x);
  // rot: X=x*cy+z*sy, Z1=-x*sy+z*cy, Y=y*cx-Z1*sx, Z=y*sx+Z1*cx  （列優先）
  gl.uniformMatrix3fv(L.uR,false,new Float32Array([cy,sx*sy,-cx*sy, 0,cx,sx, sy,-sx*cy,cx*cy]));
@@ -926,20 +937,25 @@ function hglDraw(glcv,c,S,W,H,sc,off){
   gl.bindBuffer(gl.ARRAY_BUFFER,p.bR);gl.enableVertexAttribArray(L.aR);gl.vertexAttribPointer(L.aR,3,gl.FLOAT,false,0,0);
   gl.bindBuffer(gl.ARRAY_BUFFER,p.bZ);gl.enableVertexAttribArray(L.aZ);gl.vertexAttribPointer(L.aZ,1,gl.FLOAT,false,0,0);
   gl.bindBuffer(gl.ARRAY_BUFFER,p.bD);gl.enableVertexAttribArray(L.aD);gl.vertexAttribPointer(L.aD,1,gl.FLOAT,false,0,0);
-  gl.uniform3fv(L.uCol,col);gl.uniform3fv(L.uEx,exc||EXC);gl.uniform1f(L.uExK,exk);gl.uniform1f(L.uK,k);gl.uniform3fv(L.uC,cen);gl.uniform3fv(L.uO,off3||[0,0,0]);
-  gl.uniform1f(L.uZoneOn,(p.c==='LV'||p.c==='RV')&&c.zone?1:0);gl.uniform1f(L.uViewOn,(p.c==='LV'||p.c==='RV')&&hView?1:0);
+  gl.uniform3fv(L.uCol,col);gl.uniform3fv(L.uEx,exc||EXC);gl.uniform1f(L.uExK,exk);gl.uniform1f(L.uK,k);gl.uniform1f(L.uZK,(p.c==='LV'||p.c==='RV'||p.c==='ART')&&(c.zone||c.zkey)?(c.wm??HWM[c.id]??1):0);gl.uniform1f(L.uLift,p.c==='ART'?1.1:0);gl.uniform3fv(L.uC,cen);gl.uniform3fv(L.uO,off3||[0,0,0]);
+  gl.uniform1f(L.uZoneOn,(p.c==='LV'||p.c==='RV')&&(c.zone||c.zkey)?(c.zI??1):0);gl.uniform1f(L.uScar,c.scar||0);gl.uniform1f(L.uViewOn,(p.c==='LV'||p.c==='RV')&&hView?1:0);
   gl.uniform1f(L.uArt,art?1:0);gl.uniform1f(L.uDead,deadD);gl.uniform1f(L.uA,alpha);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,p.bI);gl.drawElements(gl.TRIANGLES,p.idx.length,gl.UNSIGNED_SHORT,0)};
  const G=HGL.G,BIG=c.big||{},VS=c.valve||{},WALL={LA:1,RA:1,LV:1,RV:1};
  const geo=p=>{const gr=group(p),gk=gr==='ATR'?S.ak:gr==='VEN'?S.vk:1,bg=BIG[p.c]||(p.c==='ART'?1:1);return bg!==1?[gk*bg,G[p.c]]:[gk,gr==='ATR'?G.ATR:G.VEN]};
  const wall=(p,alpha)=>{const[k,cen]=geo(p);let exk=0;if(p.c==='RA')exk=S.ra;else if(p.c==='LA')exk=S.la;else if(p.c==='RV')exk=S.rv;else if(p.c==='LV')exk=S.lv;draw(p,MU,exk*.85,k,cen,false,1e9,alpha)};
  const other=p=>{
-  if(p.c==='ART'){if(!hCor)return;const[k,cen]=geo(p),dd=dead&&!dead.sten&&dead.sys.includes(p.s)?dead.d:1e9;draw(p,COL.ART,0,k,cen,true,dd,1);return}
+  if(p.c==='ART'){if(!hCor)return;const[k,cen]=geo(p),dd=dead&&!dead.sten?(dead.ddf?dead.ddf(p):dead.sys.includes(p.s)?dead.d:1e9):1e9;draw(p,COL.ART,0,k,cen,true,dd,1);return}
   if(p.c==='AO'||p.c==='PA'){if(hVes)draw(p,COL[p.c],0,1,G.VEN,false,1e9,1);return}
   if(!hSee)return;
   if(p.c==='VALVE'){const st=VS[p.s],open=(p.s==='MV'||p.s==='TV')?S.dia:S.sys,col=st==='sten'?[1,.55,.05]:st==='regurg'?[.62,.25,.92]:[.98,.97,.92];draw(p,col,open?.3:0,S.vk,G.VEN,false,1e9,1,null,[1,1,1]);return}
   if(p.c==='PAP'){const rup=c.mech==='pmr'&&p.s==='LVP';let o=null;if(rup){const d=nz([G.MV[0]-G.LVP[0],G.MV[1]-G.LVP[1],G.MV[2]-G.LVP[2]]),m=S.sys?10:3;o=[d[0]*m,d[1]*m,d[2]*m]}draw(p,rup?[.92,.12,.12]:[.86,.52,.5],0,S.vk,G.VEN,false,1e9,1,o);return}};
- HGL.parts.forEach(p=>{if(p.c==='COND'||p.c==='VEIN')return;if(WALL[p.c]){if(!hSee)wall(p,1)}else other(p)});
+ gl.enable(gl.STENCIL_TEST);gl.stencilOp(gl.KEEP,gl.KEEP,gl.REPLACE);
+ HGL.parts.forEach(p=>{if(p.c==='COND'||p.c==='VEIN')return;gl.stencilFunc(gl.ALWAYS,(p.c==='LA'||p.c==='RA')?1:0,255);if(WALL[p.c]){if(!hSee)wall(p,1)}else other(p)});
+ if(hCor&&!hSee){/* 心房の陰になった冠動脈を透かして表示 */gl.stencilFunc(gl.EQUAL,1,255);gl.stencilOp(gl.KEEP,gl.KEEP,gl.KEEP);gl.depthFunc(gl.GREATER);gl.depthMask(false);const vz=G.VEN[1]*sx+(-G.VEN[0]*sy+G.VEN[2]*cy)*cx;gl.uniform1f(L.uGZ,vz-14);
+  HGL.parts.forEach(p=>{if(p.c==='ART'){const[k,cen]=geo(p),dd=dead&&!dead.sten?(dead.ddf?dead.ddf(p):dead.sys.includes(p.s)?dead.d:1e9):1e9;draw(p,[.9,.08,.14],0,k,cen,true,dd,.85)}});
+  gl.uniform1f(L.uGZ,-1e4);gl.depthFunc(gl.LEQUAL);gl.depthMask(true)}
+ gl.disable(gl.STENCIL_TEST);
  if(hSee){gl.depthMask(false);HGL.parts.forEach(p=>{if(WALL[p.c])wall(p,.24)});gl.depthMask(true)}
  if(hCond){gl.disable(gl.DEPTH_TEST);HGL.parts.forEach(p=>{if(p.c!=='COND')return;const on={SA:S.sa,IN:S.inn,AV:S.av,HIS:S.his,RB:S.rb,LB:S.lb}[p.s];
   const blocked=(c.blk==='R'&&p.s==='RB')||(c.blk==='L'&&p.s==='LB');draw(p,blocked?[.5,.5,.56]:on?[1,.62,.1]:[.85,.72,.72],0,1,G.VEN,false,1e9,on?1:blocked?.7:.32)});gl.enable(gl.DEPTH_TEST)}
@@ -970,7 +986,7 @@ function draw3DGL(cv,c,S){
  if(hCond){if(c.blk)txt('✕',c.blk==='L'?G.LB:G.RB,'#d62b2b',22,0,8);if(c.avd||S.x)txt('✕',G.AV,'#d62b2b',20,0,7)}
  if(S.sx&&hLab)txt('洞停止中',G.SA,'#d62b2b',13,0,-16);
  /* 閉塞・狭窄の印 */
- if(hCor&&dead){const p=hglPoint(dead.a==='LMT'?['LMT']:[dead.a],dead.d);if(p){const q=P2(p),st=dead.sten,al=front(p)?1:.35;x.globalAlpha=al;x.beginPath();x.arc(q[0],q[1],8,0,7);x.fillStyle=st?'#e8b600':'#111';x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+ if(hCor&&dead){const p=dead.P||hglPoint(dead.a==='LMT'?['LMT']:[dead.a],dead.d);if(p){const q=P2(p),st=dead.sten,al=front(p)?1:.35;x.globalAlpha=al;x.beginPath();x.arc(q[0],q[1],8,0,7);x.fillStyle=st?'#e8b600':'#111';x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
   x.strokeStyle=st?'#111':'#fff';x.lineWidth=2.2;x.beginPath();x.moveTo(q[0]-4,q[1]-4);x.lineTo(q[0]+4,q[1]+4);x.moveTo(q[0]+4,q[1]-4);x.lineTo(q[0]-4,q[1]+4);x.stroke();x.globalAlpha=1;if(hLab&&al===1)txt(st?'狭窄':'閉塞',p,'#111',11,0,-13)}}
 
  /* 弁膜症・機械的合併症：血流の矢印など */
@@ -1075,6 +1091,211 @@ function basic(id){document.body.classList.remove('homeview');cur=null;cancelAni
  const mv=app.querySelector('#bmv');if(mv){const show=k=>{const v=view12(k);mv.innerHTML=`<div class="fb" style="margin:8px 0;background:light-dark(#e8f0fd,#15264a);border:1.5px solid #1d5fd0;font-size:17px"><b>${v.lab}</b>：${v.area}${leadFigHTML(v)}</div>`;app.querySelectorAll('[data-bk]').forEach(x=>x.classList.toggle('on',x.dataset.bk===k))};show('II');app.querySelectorAll('[data-bk]').forEach(x=>x.onclick=()=>show(x.dataset.bk))}
  window.scrollTo(0,0)}
 
+/* ==== シミュレーター（閉塞シミュレーター／電解質スライダー／梗塞の時間経過） ==== */
+const SIMS=[
+ {id:'occ',t:'閉塞シミュレーター',s:'冠動脈をタップして詰まらせる',col:'#ff6b6b',ic:'✕'},
+ {id:'elec',t:'電解質・体温スライダー',s:'K・Ca・Mg・体温で波形が変わる',col:'#f5c542',ic:'K'},
+ {id:'tc',t:'梗塞の時間経過',s:'発症から陳旧性まで',col:'#5ad1c8',ic:'⏱'}];
+function simGo(id){document.body.classList.remove('homeview');cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
+ if(id==='occ')occSim();else if(id==='elec')elecSim();else tcSim();window.scrollTo(0,0)}
+const clamp01=v=>Math.max(0,Math.min(1,v));
+const lerpK=(arr,t)=>{const i=Math.max(0,Math.min(arr.length-1,t)),a=Math.floor(i),b=Math.min(arr.length-1,a+1),f=i-a;return arr[a]+(arr[b]-arr[a])*f};
+/* 決まった形の波形（ランダムな回転・振幅をかけない） */
+function sigFix(fn){const s=sigNew();s.stK=1;fn(s);for(let i=0;i<N;i++)s.n[i]=(Math.random()-.5)*.012;return s}
+/* ST偏位（mV）を誘導ごとに */
+function stByLead(amp,dir){const o={};K12.forEach(k=>{o[k]=amp*K*dot(nz(dir),L12[k])});return o}
+const leadJoin=a=>a.map(k=>kLab(k)).join('・')||'なし';
+
+/* ---------- 1. 閉塞シミュレーター ---------- */
+const SYSN={PD:'後下行枝（PD）',LAD:'LAD（左前下行枝）',DG:'対角枝',LCX:'LCx（左回旋枝）',RCA:'RCA（右冠動脈）',LMT:'LMT（左主幹部）'};
+let TERR=null;
+function hglTerr(){if(TERR)return TERR;const AP=[];
+ let pdBest=null,pdY=35;HGL.parts.forEach(p=>{if(p.c!=='ART'||p.s!=='LCX')return;let y=0;for(let i=0;i<p.nv;i++)y+=p.P[i*3+1]/p.nv;if(y>pdY){pdY=y;pdBest=p}});if(pdBest)pdBest.pd=true;
+ HGL.parts.forEach((p,pi)=>{if(p.c!=='ART'||!SYSN[p.s])return;let mn=1e9,mx=0;for(let i=0;i<p.nv;i++){mn=Math.min(mn,p.D[i]);mx=Math.max(mx,p.D[i])}p.minD=mn;p.maxDp=mx;
+  for(let i=0;i<p.nv;i+=2)AP.push([p.P[i*3],p.P[i*3+1],p.P[i*3+2],p,p.D[i]])});
+ const CS=6,grid=new Map(),key=(a,b,c)=>a+','+b+','+c;
+ AP.forEach((q,j)=>{const k=key(Math.floor(q[0]/CS),Math.floor(q[1]/CS),Math.floor(q[2]/CS));(grid.get(k)||grid.set(k,[]).get(k)).push(j)});
+ const KN=6;
+ HGL.parts.forEach(p=>{if(p.c!=='LV'&&p.c!=='RV')return;p.NN=new Int32Array(p.nv*KN);
+  for(let i=0;i<p.nv;i++){const x=p.P[i*3],y=p.P[i*3+1],z=p.P[i*3+2],gx=Math.floor(x/CS),gy=Math.floor(y/CS),gz=Math.floor(z/CS);let best=[];
+   for(let r=1;r<=7;r++){best=[];for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++)for(let c=-r;c<=r;c++){const L=grid.get(key(gx+a,gy+b,gz+c));if(!L)continue;for(const j of L){const q=AP[j],d=(q[0]-x)**2+(q[1]-y)**2+(q[2]-z)**2;best.push([d,j])}}
+    if(best.length>=KN)break}
+   best.sort((u,v)=>u[0]-v[0]);for(let k=0;k<KN;k++)p.NN[i*KN+k]=best.length?best[Math.min(k,best.length-1)][1]:0}});
+ TERR={AP,KN};return TERR}
+/* タップした血管・位置から「どこから先が流れないか」を決める */
+let occDom='R',occL='II';
+function occMake(part,d){const T=hglTerr(),RD=occDom==='R',isPD=RD&&!!part.pd,s=isPD?'PD':part.s;
+ const ddf=p=>{if(p.c!=='ART'||!SYSN[p.s])return 1e9;
+  if(RD&&p.pd){if(p===part)return d;if(s==='RCA')return -1;return 1e9}
+  if(isPD)return 1e9;
+  if(s==='LMT'){if(p.s==='LMT')return d;if(p.s==='LAD'||p.s==='DG'||p.s==='LCX')return -1;return 1e9}
+  if(p===part)return d;
+  if(p.s===s){return p.minD>=d-1?-1:1e9}
+  if(s==='LAD'&&p.s==='DG')return p.minD>=d-1?-1:1e9;
+  return 1e9};
+ const sys=s==='LMT'?['LMT','LAD','DG','LCX']:s==='LAD'?['LAD','DG']:[s];
+ const dead=j=>{const q=T.AP[j];return q[4]>ddf(q[3])};
+ const G0=HGL.G;let mx=G0.maxD[s]||part.maxDp||80,lm=G0.maxD.LMT||9,rel=s==='PD'?(d-part.minD)/Math.max(1,part.maxDp-part.minD):s==='LAD'||s==='LCX'||s==='DG'?(d-lm)/Math.max(1,mx-lm):d/mx;
+ const pos=s==='LMT'?'':rel<.22?'近位部':rel<.55?'中間部':'遠位部';
+ return{a:s,d,sys,ddf,dead,pos,rel,label:SYSN[s]+pos}}
+function occCase(o){const c={id:'occsim',n:'閉塞シミュレーター',zkey:o?('occ'+occDom+o.a+Math.round(o.d*10)+'_'+o.part_id):'occ0',wm:1};
+ if(!o){c.zkey='occ0';c.zfn=()=>0;return c}
+ const T=hglTerr();c.occ=o;
+ c.zfn=(p,i)=>{if(p.c==='ART')return o.ddf(p)<p.D[i]?1:0;if(!p.NN)return 0;let n=0;for(let k=0;k<T.KN;k++)if(o.dead(p.NN[i*T.KN+k]))n++;return n/T.KN};
+ return c}
+/* 梗塞範囲（3D）からST上昇の向きと大きさを出す */
+function occAnalyze(c){const G0=HGL.G;let sw=0,tot=0,v=[0,0,0];const reg={ant:0,inf:0,lat:0,post:0,apex:0,rv:0},regN={ant:0,inf:0,lat:0,post:0,apex:0,rv:0};
+ HGL.parts.forEach(p=>{if(p.c!=='LV'&&p.c!=='RV')return;for(let i=0;i<p.nv;i++){const P3=[p.P[i*3],p.P[i*3+1],p.P[i*3+2]],w=c.zfn(p,i),dir=nz([P3[0]-G0.VEN[0],P3[1]-G0.VEN[1],P3[2]-G0.VEN[2]]);
+  const l=p.c==='LV'?1:hglIsL(P3),mw=w*(1+2.2*l);tot++;sw+=w;v[0]+=mw*dir[0];v[1]+=mw*dir[1];v[2]+=mw*dir[2];
+  const r=nz([P3[0]-G0.LV[0],P3[1]-G0.LV[1],P3[2]-G0.LV[2]]),q=[p.Rd[i*3],p.Rd[i*3+1],p.Rd[i*3+2]];
+  for(const k in reg){const h=k==='rv'?(1-l):+HZ[k](l,r,q,P3);reg[k]+=w*h;regN[k]+=h}}});
+ const frac=sw/Math.max(1,tot),names={ant:'前壁',inf:'下壁',lat:'側壁',post:'後壁',apex:'心尖部',rv:'右室'};
+ const areas=Object.keys(reg).filter(k=>regN[k]>0&&reg[k]/regN[k]>.35).map(k=>names[k]);
+ return{frac,dir:sw>0?nz(v):[0,0,1],areas,rvF:regN.rv?reg.rv/regN.rv:0}}
+function occSignal(c,o,an){
+ if(!o||an.frac<.004)return sigFix(s=>reg(.35,.85,t=>beat(s,t,{}),.01));
+ if(o.a==='LMT'){const lm=C.find(x=>x.id==='lmt');return sigFix(s=>lm.gen(s))}
+ const f=clamp01(an.frac/.3),amp=.07+.3*f,rr=o.a==='RCA'&&o.rel<.25?1.22:o.a==='RCA'&&o.rel<.5?1.0:.82,pr=o.a==='RCA'&&o.rel<.25?.24:.16;
+ const tD=nz([D.T[0]*.4+an.dir[0],D.T[1]*.4+an.dir[1],D.T[2]*.4+an.dir[2]]);
+ return sigFix(s=>reg(.35,rr,t=>beat(s,t,{pr,st:amp,stD:an.dir,ta:.25+.3*f,tD,tc:.27,t1:.07,t2:.045}),.01))}
+function hglPick(cv,mx,my){const W=cv.clientWidth,Hh=cv.clientHeight,sc=Math.min(W,Hh)/150,off=4,cy=Math.cos(hRot.y),sy=Math.sin(hRot.y),cx=Math.cos(hRot.x),sx=Math.sin(hRot.x);
+ const pr=(x,y,z)=>{const X=x*cy+z*sy,Z1=-x*sy+z*cy,Y=y*cx-Z1*sx,Zz=y*sx+Z1*cx,f=500/(500-Zz);return[W/2+X*sc*f,Hh/2+(Y+off)*sc*f,Zz]};
+ const vz=pr(...HGL.G.VEN)[2]-8;let best=null,bs=1e9;HGL.parts.forEach(p=>{if(p.c!=='ART'||!SYSN[p.s])return;for(let i=0;i<p.nv;i++){const q=pr(p.P[i*3],p.P[i*3+1],p.P[i*3+2]);if(q[2]<vz)continue;const d=Math.hypot(q[0]-mx,q[1]-my);if(d<20){const sc2=d-.12*q[2];if(sc2<bs){bs=sc2;best={p,i,D:p.D[i]}}}}});
+ return best}
+function occSim(){hView=null;hCor=true;hCond=false;hLab=true;hSee=false;hRot.auto=false;hRot.y=0;hRot.x=0;
+ if(!hglInit()){app.innerHTML='<div class="card"><h2>閉塞シミュレーター</h2><p>この端末では立体表示（WebGL）が使えないため、このシミュレーターは使えません。</p><button class="btn pri" id="bk">ホームへ</button></div>';app.querySelector('#bk').onclick=home;return}
+ app.innerHTML=`<div class="card"><span class="tag">シミュレーター</span><h2 style="font-size:20px;margin:0 0 6px">閉塞シミュレーター</h2><p class="mut" style="margin:0">冠動脈を<b>タップ</b>すると、その場所で詰まります。そこから先の心筋が梗塞になり、12誘導も変わります。指でドラッグすると回転します。</p></div>
+ <div class="card"><canvas id="h3" style="width:100%;height:min(92vw,420px);display:block;touch-action:none;cursor:crosshair" aria-label="心臓の立体モデル。冠動脈をタップで閉塞"></canvas>
+ <div class="seg" style="margin-top:8px"><button data-v="f">正面</button><button data-v="b">後ろ</button><button data-v="u">下から</button><button data-v="l">左横</button><button id="oves" class="${hVes?'on':''}">大血管</button><button id="oclr">閉塞を解除</button></div>
+ ${monHTML('omon').replace('height:150px','height:120px')}<div id="old"></div>
+ <div id="oinfo" style="margin-top:10px"></div>
+ <div class="mut" style="margin:12px 0 4px">冠動脈のタイプ</div><div class="seg"><button data-dom="R" class="${occDom==='R'?'on':''}">右冠動脈優位型</button><button data-dom="L" class="${occDom==='L'?'on':''}">左冠動脈優位型</button></div><div class="sm" id="odomn" style="margin-top:4px"></div></div>
+ <div class="card"><h2>12誘導</h2><div id="ohr"></div><div class="paper"><canvas id="c12"></canvas></div><div class="sm">各誘導0〜2.5秒／最下段：Ⅱ誘導0〜10秒</div></div>
+ <div class="card"><div class="sm">実際の梗塞範囲は、冠動脈の走り方（右冠動脈優位か左か）や側副血行で人によって違います。3Dの血管の形は、後下行枝がLCxから伸びる左冠動脈優位型のデータです。「右冠動脈優位型」を選ぶと、後下行枝をRCAの枝として計算します。心臓の3Dデータ：BodyParts3D（© ライフサイエンス統合データベースセンター、CC BY-SA 2.1 JP）を加工して使用</div><div class="row" style="margin-top:10px"><button class="btn pri" id="bk">ホームへ</button></div></div>`;
+ const cv=app.querySelector('#h3'),c12=app.querySelector('#c12'),info=app.querySelector('#oinfo'),ohr=app.querySelector('#ohr');
+ let c,s,lastO=null;
+ const runH=()=>heartRun(c,s,app,null,{cv:app.querySelector('#omon'),pr:proj(s,L12[occL]),lab:kLab(occL)+'誘導',hr:hrOf({},s)});
+ const lds=()=>{app.querySelector('#old').innerHTML=ldBtns(occL,'data-ld');app.querySelectorAll('[data-ld]').forEach(b=>b.onclick=()=>{occL=b.dataset.ld;lds();draw12(c12,s,occL);runH()})};
+ const set=o=>{let up=[],dn=[];if(!o)lastO=null;c=occCase(o);const an=o?occAnalyze(c):{frac:0,dir:[0,0,1],areas:[]};s=occSignal(c,o,an);hT0=performance.now();
+  if(!o||an.frac<.004){c.zfn=c.zfn||(()=>0)}
+  ohr.innerHTML=hrHTML({},s);
+  if(!o){info.innerHTML='<div class="fb" style="margin:0">まだ詰まっていません。冠動脈（赤い血管）をタップしてください。</div>'}
+  else{up=[];dn=[];if(o.a==='LMT'){up=['aVR'];dn=['I','II','aVL','aVF','V4','V5','V6']}else{const amp=.07+.3*clamp01(an.frac/.3),st=stByLead(amp,an.dir);K12.forEach(k=>{if(st[k]>.1)up.push(k);else if(st[k]<-.1)dn.push(k)})}
+   const post=an.areas.includes('後壁')&&dn.some(k=>['V1','V2','V3'].includes(k));
+   info.innerHTML=`<div class="fb ng" style="margin:0"><b>閉塞部位：</b>${o.label}<br><b>梗塞になる範囲：</b>${an.areas.join('・')||'ごく狭い範囲'}（左室・右室の約${Math.round(an.frac*100)}%）<br><b>ST上昇：</b>${leadJoin(up)}<br><b>鏡面像（ST低下）：</b>${leadJoin(dn)}${post?'<br>V1〜V3のST低下は、後壁梗塞の鏡面像（裏返し）です。':''}${an.rvF>.3?'<br>右室も梗塞の範囲に入っています（V4RでST上昇。右室梗塞）。':''}${o.a==='RCA'&&occDom==='R'?'<br>右冠動脈優位型なので、下壁を養う後下行枝（3DではLCxの先から伸びて見える血管）も灰色＝血流なしになります。':''}${o.a==='RCA'&&o.rel<.25?'<br>RCAの根元に近いため、洞結節・房室結節への枝も止まり、徐脈・房室ブロックが出やすくなります（PR延長・徐脈で表示）。':''}${o.a==='LMT'?'<br>左主幹部の閉塞は左室の大部分が虚血になり、aVRのST上昇と広い範囲のST低下が目印。ショックや心停止になりやすい最重症型です。':''}</div>`}
+  if(o&&up.length){let mx=-1e9;const st=stByLead(.07+.3*clamp01(an.frac/.3),an.dir);(o.a==='LMT'?['aVR']:up).forEach(k=>{if((st[k]||0)>mx){mx=st[k];occL=k}})}
+  draw12(c12,s,occL);lds();runH()};
+ cv._onTap=(x,y)=>{const h=hglPick(cv,x,y);if(!h)return;const d0=Math.max(h.D,(h.p.minD||0)+.5),o=occMake(h.p,d0);lastO={part:h.p,d0};o.part_id=HGL.parts.indexOf(h.p);o.P=[h.p.P[h.i*3],h.p.P[h.i*3+1],h.p.P[h.i*3+2]];lastO.part_id=o.part_id;lastO.P=o.P;set(o)};
+ const V={f:[0,0],b:[0,Math.PI],u:[1.2,0],l:[0,-Math.PI/2]};
+ app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const[tx,ty]=V[b.dataset.v],x0=hRot.x,y0=hRot.y,t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/400),e=1-Math.pow(1-k,3);hRot.x=x0+(tx-x0)*e;hRot.y=y0+(ty-y0)*e;if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)});
+ app.querySelector('#oclr').onclick=()=>set(null);
+ app.querySelector('#oves').onclick=e=>{hVes=!hVes;e.currentTarget.classList.toggle('on',hVes)};
+ const domNote=()=>{app.querySelector('#odomn').innerHTML=occDom==='R'?'日本人の多く（約8割）はこちら。心臓の下側（下壁）を養う<b>後下行枝</b>がRCAから出ます。3Dの形はLCxの先から伸びて見えますが、RCAの枝として扱います。':'後下行枝がLCxから出るタイプ。LCxが詰まると下壁まで梗塞し、RCAが詰まっても右室だけになります。'};domNote();
+ app.querySelectorAll('[data-dom]').forEach(b=>b.onclick=()=>{occDom=b.dataset.dom;app.querySelectorAll('[data-dom]').forEach(x=>x.classList.toggle('on',x===b));domNote();if(lastO){const o=occMake(lastO.part,lastO.d0);o.part_id=lastO.part_id;o.P=lastO.P;set(o)}});
+ app.querySelector('#bk').onclick=home;
+ set(null)}
+
+/* ---------- 2. 電解質スライダー ---------- */
+const ELEC={
+ K:{n:'カリウム（K）',u:'mEq/L',min:1.5,max:9,step:.1,def:4.2,lo:3.5,hi:5.0},
+ Ca:{n:'カルシウム（Ca）',u:'mg/dL',min:5,max:16,step:.1,def:9.4,lo:8.5,hi:10.5},
+ Mg:{n:'マグネシウム（Mg）',u:'mg/dL',min:.6,max:10,step:.1,def:2.1,lo:1.8,hi:2.4},
+ T:{n:'体温',tab:'体温',u:'℃',min:20,max:37,step:.1,def:36.5,lo:35,hi:99,stat:v=>v>=35?['正常範囲','#1f9d4a']:v>=32?['軽度低体温','#2d6ad6']:v>=28?['中等度低体温','#1b47a8']:['高度低体温','#5b2bb0'],range:'35℃以上が正常（深部体温）'}};
+function elecModel(k,v){const o={},notes=[];let rr=.82,pvc=false;
+ if(k==='K'){const lo=clamp01((3.5-v)/2),h1=clamp01((v-5.3)/1.5),h2=clamp01((v-6.5)/1.5),h3=clamp01((v-7)/2),h4=clamp01((v-8.2)/.8);
+  Object.assign(o,{p:.15*(1-h2),pr:.16+.08*h2,rw:.011+.028*h3,sw:.22+.12*h3,r:1.1-.35*h4,ta:.3*(1-.8*lo)+.9*h1-.4*h4,t1:.05-.018*h1+.03*h4,t2:.035-.006*h1+.03*h4,tc:.26+.04*lo-.03*h4,u:.3*lo,st:-.07*lo,stD:D.T});
+  if(h4>.4)rr=1.15;
+  if(lo>0){notes.push('T波が低く平らになる');if(lo>.2)notes.push('U波が出る（T波のあとの小さな山）');if(lo>.35)notes.push('ST低下');if(lo>.5)notes.push('TとUがつながってQT（QU）が長く見える');if(lo>.6){notes.push('期外収縮・VT・トルサードが出やすい');pvc=true}}
+  if(h1>0)notes.push('T波が高く尖る（テント状T波：幅が狭く左右対称）');
+  if(h2>0)notes.push('P波が小さく平らに、PRが延長');
+  if(h3>0)notes.push('QRS幅が広がる');
+  if(h4>.3)notes.push('QRSとT波が融合してサインカーブ様に→VF・心停止の直前');}
+ if(k==='Ca'){const lo=clamp01((8.5-v)/3.2),hi=clamp01((v-10.5)/5);
+  Object.assign(o,{tc:.27+.11*lo-.075*hi,ta:.3});rr=.82+.18*hi;
+  if(lo>0){notes.push('ST部分が長く平らに伸びる（T波の形はほぼ正常）');notes.push('QT延長');}
+  if(hi>0){notes.push('ST部分が短くなり、T波がQRSのすぐ後ろから立ち上がる');notes.push('QT短縮');if(hi>.6)notes.push('徐脈・房室ブロックが出ることもある');}}
+ if(k==='Mg'){const lo=clamp01((1.8-v)/1.2),hi=clamp01((v-4.8)/4.5);
+  Object.assign(o,{ta:.3*(1-.55*lo),u:.18*lo,tc:.26+.06*lo,pr:.16+.14*hi,rw:.011+.015*hi});rr=.82+.5*hi;
+  if(lo>0){notes.push('T波が平らに、U波が出る（低Kと似ている）');notes.push('QT延長');if(lo>.5){notes.push('期外収縮・トルサード・ド・ポアンツが出やすい');pvc=true}notes.push('低K血症を合併していることが多い');}
+  if(hi>0){notes.push('PR延長');if(hi>.3)notes.push('QRS幅が広がる');if(hi>.5)notes.push('徐脈・房室ブロック');if(hi>.85)notes.push('さらに高くなると心停止の危険');}}
+ if(k==='T'){if(v>=35.2&&v<36.6)notes.push('寒さでふるえ始め、基線が細かく揺れる（筋電図のノイズ）');if(v>=35&&v<36.6)notes.push('軽い洞頻脈');
+  if(v<35&&v>30.5){if(v>31.5)notes.push('ふるえのノイズが目立つ');notes.push(v>33?'頻脈から洞徐脈へ':'洞徐脈');notes.push('PR・QTが延びてくる')}
+  if(v<32.5&&v>24.5)notes.push('J波（オズボーン波）：QRSの終わりのこぶ。体温が下がるほど大きくなる');
+  if(v<=31.5&&v>24.5)notes.push('ふるえが止まり、ノイズが消える');
+  if(v<=30.5&&v>24.5){notes.push('ゆっくりした心房細動（P波が消えRRがバラバラ）');notes.push('PR・QRS・QTの延長、高度の徐脈')}
+  if(v<=28&&v>24.5)notes.push('VFが起きやすい。体を大きく動かしたり乱暴に扱ったりする刺激でVFになることがある');
+  if(v<=24.5&&v>22)notes.push('心室細動（VF）');if(v<=22)notes.push('心静止')}
+ return{o,rr,pvc,notes}}
+function tempSig(v){const HRK=[[37,75],[35,92],[32,56],[28,42],[24.5,32]],hr=(()=>{for(let i=0;i<HRK.length-1;i++){const[a,ha]=HRK[i],[b,hb]=HRK[i+1];if(v<=a&&v>=b)return ha+(hb-ha)*(a-v)/(a-b)}return v>37?75:32})();
+ const sh=clamp01((36.6-v)/1.2)*clamp01((v-31)/1.5),j=.55*Math.pow(clamp01((32.5-v)/8.5),.9),o={pr:.16+.1*clamp01((34-v)/10),rw:.011+.008*clamp01((32-v)/8),tc:.26+.1*clamp01((35-v)/11),t1:.06,t2:.045};
+ const s=sigNew();s.stK=1;
+ if(v<=22){/* 心静止 */}
+ else if(v<=24.5){waves(s,[{a:.32,f:4.4,p:1,m:.28,d:[.5,.8,-.2]},{a:.22,f:5.6,p:2,m:.21,d:[-.3,.7,.6]},{a:.14,f:6.9,p:3,m:.33,d:[.8,.2,.5]}])}
+ else if(v<=30.5){let t=.4;while(t<DUR+.3){beat(s,t,Object.assign({},o,{p:0}));if(j)G(s,j,t+.05,.015,.03,D.R);t+=60/hr*(1+rn(-.25,.25))}waves(s,[{a:.035,f:6.3,p:.3,m:.4,d:D.P},{a:.025,f:7.7,p:1.1,m:.3,d:[-.3,.6,.7]}])}
+ else reg(.4,60/hr,t=>{beat(s,t,o);if(j)G(s,j,t+.05,.015,.03,D.R)},.01);
+ const ph=rn(0,6);for(let i=0;i<N;i++){const t=i/FS;s.n[i]=(Math.random()-.5)*.012+sh*((Math.random()-.5)*.16+.05*Math.sin(2*Math.PI*9*t+ph))*(.55+.45*Math.sin(2*Math.PI*.35*t+ph))}
+ if(v<=24.5&&v>22)s.vf=1;return s}
+function elecSig(k,v){if(k==='T')return tempSig(v);const m=elecModel(k,v);return sigFix(s=>{let n=0;reg(.35,m.rr,t=>{n++;if(m.pvc&&n%5===0)pvc(s,t-.18,D.V,1);else beat(s,t,m.o)},.01)})}
+function stripRows(cv,rows,sec){const W=cv.parentElement.clientWidth,pxs=W/sec,pxm=pxs*.4,rh=Math.round(3.6*pxm),H=rh*rows.length,dpr=window.devicePixelRatio||1;
+ cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+ const ln=(a,b,c,d,col,w)=>{x.strokeStyle=col;x.lineWidth=w;x.beginPath();x.moveTo(a,b);x.lineTo(c,d);x.stroke()};
+ x.fillStyle='#fff5f6';x.fillRect(0,0,W,H);const st=pxs*.04;
+ for(let j=0;j*st<=H;j++)ln(0,j*st,W,j*st,j%5?'#f9e0e4':'#eeaab4',j%5?.4:.9);for(let i=0;i*st<=W+1;i++)ln(i*st,0,i*st,H,i%5?'#f9e0e4':'#eeaab4',i%5?.4:.9);
+ rows.forEach((r,ri)=>{const y0=ri*rh,b=y0+rh*.58;if(ri)ln(0,y0,W,y0,'#e3a0ab',1);x.strokeStyle='#121c30';x.lineWidth=1.4;x.lineJoin='round';x.beginPath();
+  for(let i=0;i<Math.round(sec*FS);i++){const px=i/FS*pxs,py=Math.min(y0+rh-1,Math.max(y0+1,b-(r.pr.y[i]+r.n[i])*pxm));i?x.lineTo(px,py):x.moveTo(px,py)}x.stroke();
+  x.font='700 12px "Noto Sans JP",sans-serif';const w=x.measureText(r.lab).width;x.fillStyle='rgba(255,245,246,.9)';x.fillRect(3,y0+3,w+8,17);x.fillStyle='#14233b';x.fillText(r.lab,7,y0+16)})}
+let elecK='K',elecV={K:4.2,Ca:9.4,Mg:2.1,T:36.5},elecL='II';
+const ldBtns=(sel,attr)=>`<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:6px">${K12.map(k=>`<button ${attr}="${k}" style="padding:8px 0;border-radius:8px;border:1.5px solid ${k===sel?'#1d5fd0':'#c3ccd8'};background:${k===sel?'#1d5fd0':'transparent'};color:${k===sel?'#fff':'inherit'};font-weight:800;font-size:14px;font-family:inherit">${kLab(k)}</button>`).join('')}</div>`;
+const monHTML=(id)=>`<canvas id="${id}" style="width:100%;height:150px;display:block;border-radius:10px;margin-top:10px" aria-label="心電図モニター"></canvas>`;
+function elecSim(){const E=ELEC;
+ app.innerHTML=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 style="font-size:19px;margin:0">電解質・体温</h2><div class="seg" style="margin:0">${Object.keys(E).map(k=>`<button data-ek="${k}" class="${elecK===k?'on':''}">${E[k].tab||k}</button>`).join('')}</div></div>
+ <div id="ehead" style="margin-top:8px"></div><input id="erange" type="range" style="width:100%;margin:8px 0 0;accent-color:#1d5fd0;height:32px"><div id="escale" class="sm" style="display:flex;justify-content:space-between;margin:0"></div>
+ ${monHTML('emon')}<div id="eld"></div><div id="enotes"></div></div>
+ <div class="card"><div class="sm">変化が出始める値は目安です。実際は個人差や、値が変わった速さ（急か、ゆっくりか）でも違います。値だけでなく心電図の変化を一緒に見ることが大切です。</div><div class="row" style="margin-top:10px"><button class="btn pri" id="bk">ホームへ</button></div></div>`;
+ const rg=app.querySelector('#erange'),mon=app.querySelector('#emon');let raf=0,s=null,pr=null,hr='--';const t0=performance.now();
+ const lds=()=>{app.querySelector('#eld').innerHTML=ldBtns(elecL,'data-ld');app.querySelectorAll('[data-ld]').forEach(b=>b.onclick=()=>{elecL=b.dataset.ld;pr=proj(s,L12[elecL]);lds()})};
+ const paint=()=>{const k=elecK,e=E[k],v=elecV[k],st=e.stat?e.stat(v):v<e.lo?['低い','#2d6ad6']:v>e.hi?['高い','#d62b2b']:['正常範囲','#1f9d4a'];
+  app.querySelector('#ehead').innerHTML=`<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><b style="font-size:16px">${e.n}</b><span style="font-size:32px;font-weight:900;line-height:1">${v.toFixed(1)}</span><span class="mut">${e.u}</span><span style="background:${st[1]};color:#fff;border-radius:99px;padding:2px 12px;font-weight:800;font-size:14px">${st[0]}</span></div><div class="sm" style="margin:2px 0 0">${e.range||'基準値の目安：'+e.lo+'〜'+e.hi+' '+e.u}</div>`;
+  s=elecSig(k,v);pr=proj(s,L12[elecL]);hr=hrOf({vf:s.vf},s);const m=elecModel(k,v);
+  app.querySelector('#enotes').innerHTML=`<div class="fb ${m.notes.length?'ng':''}" style="margin-top:8px">${m.notes.length?'<b>この値で見られる変化</b><ul class="pts" style="margin:4px 0 0">'+m.notes.map(t=>`<li>${t}</li>`).join('')+'</ul>':'目立った変化はありません（正常な形）'}</div>`};
+ const setup=()=>{const e=E[elecK];rg.min=e.min;rg.max=e.max;rg.step=e.step;rg.value=elecV[elecK];app.querySelector('#escale').innerHTML=`<span>${e.min}</span><span>${e.max} ${e.u}</span>`;paint()};
+ rg.oninput=()=>{elecV[elecK]=+rg.value;cancelAnimationFrame(raf);raf=requestAnimationFrame(paint)};
+ app.querySelectorAll('[data-ek]').forEach(b=>b.onclick=()=>{elecK=b.dataset.ek;app.querySelectorAll('[data-ek]').forEach(x=>x.classList.toggle('on',x===b));setup()});
+ app.querySelector('#bk').onclick=home;setup();lds();
+ cancelAnimationFrame(hAnim);const loop=n=>{if(!mon.isConnected)return;miniDraw(mon,pr,((n-t0)/1000)%DUR,kLab(elecL)+'誘導',hr);hAnim=requestAnimationFrame(loop)};hAnim=requestAnimationFrame(loop)}
+
+/* ---------- 3. 梗塞の時間経過 ---------- */
+const TCST=[
+ {t:'発症前',w:'正常',d:'冠動脈はまだ流れています。',e:['正常な波形']},
+ {t:'数分〜30分',w:'超急性期',d:'LADが詰まった直後。心筋は虚血で動きが弱くなりますが、まだ壊死はしていません。',e:['T波が幅広く大きくなる（超急性期T波）','STがわずかに上がり始める']},
+ {t:'30分〜数時間',w:'急性期',d:'虚血が心筋の外側まで広がり、壊死が進んでいます。再灌流（カテーテル治療）で救える心筋が一番多い時期です。',e:['ST上昇（V1〜V4）','鏡面像としてⅡ・Ⅲ・aVFでST低下']},
+ {t:'6〜12時間',w:'急性期（後半）',d:'壊死した心筋は電気を出さなくなります。',e:['異常Q波が出てくる（R波が小さくなる）','ST上昇が続く','T波が下がり始める']},
+ {t:'数日',w:'亜急性期',d:'壊死した部分に炎症が起き、柔らかく薄くなっています。心破裂・心室中隔穿孔などの合併症が起きやすい時期です。',e:['STは基線に戻ってくる','冠性T波（深く左右対称な陰性T波）','異常Q波は残る']},
+ {t:'数週間〜',w:'陳旧性',d:'壊死した部分は線維化して白っぽい瘢痕になり、動かないまま残ります。',e:['異常Q波が残る（陳旧性心筋梗塞の目印）','T波は浅い陰性〜正常に戻ることもある']}];
+const TCK={st:[0,.05,.26,.18,.03,0],ta:[0,.45,.12,.0,-.6,-.12],q:[0,0,0,.4,.6,.6],zI:[0,.32,.9,1,.95,.9],scar:[0,0,0,.08,.35,.95],wm:[0,.45,1,1,1.1,1]};
+function tcSig(t){const st=lerpK(TCK.st,t),ta=lerpK(TCK.ta,t),q=lerpK(TCK.q,t),ANT=[.2,.15,.97];
+ return sigFix(s=>reg(.35,.8,tb=>{beat(s,tb,{st,stD:ANT,ta:.28,tc:.27+.05*clamp01(t-3),t1:.07,t2:.05,r:1.1-.15*q});if(q)G(s,q*.9,tb-.004,.013,.013,neg(ANT));if(ta)G(s,ta,tb+.27+.05*clamp01(t-3),.075,.065,ANT)},.01))}
+let tcT=2,tcL='V3';
+function tcSim(){hView=null;hCor=true;hCond=false;hLab=true;hSee=false;hRot.auto=false;hRot.y=-.55;hRot.x=0;
+ const c={id:'tcsim',n:'梗塞の時間経過',zone:'ant',cor:['LAD','occ']};
+ app.innerHTML=`<div class="card"><h2 style="font-size:18px;margin:0 0 4px">梗塞の時間経過（前壁梗塞・LAD閉塞）</h2><div id="thead"></div><input id="trange" type="range" min="0" max="5" step="0.05" style="width:100%;margin:6px 0 0;accent-color:#c8202c;height:32px">
+ <div class="sm" style="display:flex;justify-content:space-between;margin:0"><span>発症前</span><span>数時間</span><span>数日</span><span>数週〜</span></div>
+ <canvas id="h3" style="width:100%;height:min(68vw,300px);display:block;touch-action:none;cursor:grab;margin-top:6px" aria-label="心臓の立体モデル"></canvas>
+ ${monHTML('tmon').replace('height:150px','height:120px')}<div id="tld"></div></div>
+ <div class="card" id="tnotes"></div>
+ <div class="card"><h2>12誘導</h2><div class="paper"><canvas id="c12"></canvas></div><div class="sm">前壁の変化はV1〜V4で見る</div></div>
+ <div class="card"><div class="sm">時間の目安は典型例です。再灌流（治療）の有無や梗塞の大きさで、変化の速さや残り方は人によって違います。</div><div class="row" style="margin-top:10px"><button class="btn pri" id="bk">ホームへ</button></div></div>`;
+ const rg=app.querySelector('#trange'),c12=app.querySelector('#c12');rg.value=tcT;let raf=0,s=null;hT0=performance.now();
+ const paint=()=>{const t=tcT,i=Math.min(5,Math.round(t)),S=TCST[i];
+  c.zI=lerpK(TCK.zI,t);c.scar=lerpK(TCK.scar,t);c.wm=lerpK(TCK.wm,t);if(t<.2){delete c.cor;c.zI=0}else c.cor=['LAD',t>=3.6?'old':'occ'];
+  app.querySelector('#thead').innerHTML=`<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><b style="font-size:22px">${S.t}</b><span style="background:#c8202c;color:#fff;border-radius:99px;padding:2px 12px;font-weight:800;font-size:14px">${S.w}</span></div>`;
+  app.querySelector('#tnotes').innerHTML=`<div class="fb" style="margin:0"><b>心電図</b><ul class="pts" style="margin:4px 0 6px">${S.e.map(x=>`<li>${x}</li>`).join('')}</ul><b>心筋では</b><div>${S.d}</div></div>`;
+  s=tcSig(t);draw12(c12,s,tcL);const keep=performance.now()-hT0;hT0=performance.now()-(isFinite(keep)?keep:0);run()};
+ const run=()=>heartRun(c,s,app,null,{cv:app.querySelector('#tmon'),pr:proj(s,L12[tcL]),lab:kLab(tcL)+'誘導',hr:hrOf({},s)});
+ const lds=()=>{app.querySelector('#tld').innerHTML=ldBtns(tcL,'data-ld');app.querySelectorAll('[data-ld]').forEach(b=>b.onclick=()=>{tcL=b.dataset.ld;lds();draw12(c12,s,tcL);run()})};lds();
+ rg.oninput=()=>{tcT=+rg.value;cancelAnimationFrame(raf);raf=requestAnimationFrame(paint)};
+ app.querySelector('#bk').onclick=home;paint()}
+
 const app=document.getElementById('app');
 let Q=null;
 /* 苦手（間違えた問題）の保存：この端末のブラウザ内だけ */
@@ -1099,13 +1320,15 @@ function home(){cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
  <div class="blk">
   <button class="hcard hzukan" id="lib"><span class="ic" style="background:#6f9bff"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0b1430" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M7.5 11.5h2l1-2 2 4 1-2h3"/></svg></span><span><span class="t">心電図図鑑</span><span class="s">${nLib}波形・12誘導・心臓の動き</span></span><span class="ar">›</span></button>
  </div>
+ <div class="sec">SIMULATOR</div>
+ <div class="blk">${SIMS.map(m=>`<button class="hcard hsmall" data-sim="${m.id}"><span class="ic" style="background:${m.col}"><span class="bi">${m.ic}</span></span><span><span class="t">${m.t}</span><span class="s">${m.s}</span></span><span class="ar">›</span></button>`).join('')}</div>
  <div class="sec">BASICS</div>
  <div class="blk bas">${BASICS.filter(b=>b.id==='mean').map(b=>`<button class="hcard hsmall" data-b="${b.id}"><span class="ic" style="background:${b.col}"><span class="bi">12</span></span><span><span class="t">${b.t}</span><span class="s">${b.s}</span></span><span class="ar">›</span></button>`).join('')}</div>
  <div class="foot">学習用のシミュレーションです</div></div>`;
  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>start(b.dataset.go==='all'?shuf(C):shuf(C).slice(0,10)));
  const wb=app.querySelector('#weak');if(wk.length)wb.onclick=()=>start(shuf(C.filter(c=>wk.includes(c.id))),false,true);
  app.querySelector('#lib').onclick=lib;
- app.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>basic(b.dataset.b))}
+ app.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>basic(b.dataset.b));app.querySelectorAll('[data-sim]').forEach(b=>b.onclick=()=>simGo(b.dataset.sim))}
 function start(list,m12,weak){cancelAnimationFrame(hAnim);document.body.classList.remove('homeview');Q={list,i:0,dOK:0,pOK:0,aOK:0,wrong:[],m12:!!m12,weak:!!weak};nextQ()}
 function nextQ(){SW0=0;const c=Q.list[Q.i];Object.assign(Q,{c,s:sig(c),st:{pl:Object.assign({},STD_PL.II),set:'II',cc:'g'},ans:null,op:opts(c),shown:false,act:null,aop:actOpts(c)});Q.m12?renderQ12():renderQ();window.scrollTo(0,0)}
 function renderQ(){
@@ -1166,7 +1389,7 @@ function detail(c){hRot.auto=false;hRot.y=0;hRot.x=0;hSee=!!(c.valve||c.mech);if
   <div class="hwrap"><div>${hMode==='3d'?'<canvas id="h3" style="width:100%;height:min(76vw,380px);display:block;touch-action:none;cursor:grab" aria-label="心臓の立体モデル。ドラッグで回転"></canvas>':`<div class="heart ${hCond?'':'nocd'} ${hLab?'':'nolb'}">${heartSVG(c)}</div>`}</div>
   <div class="lsel" role="group" aria-label="誘導の切り替え"><div class="t" style="grid-column:auto">肢</div><div class="t" style="grid-column:auto">胸部</div>${['I','V1','II','V2','III','V3','aVR','V4','aVL','V5','aVF','V6'].map(k=>`<button data-k12="${k}" class="${hKey===k?'on':''}">${kLab(k)}</button>`).join('')}</div></div>
   ${hMode==='3d'?'<div class="sm" style="text-align:center;margin-top:0">指でドラッグで回転／「正面に戻す」で正面に戻る</div>':'<div class="sm" style="text-align:center;margin-top:0">右のボタンで誘導を切り替え</div>'}
-  <div class="leg"><span><span class="dot" style="background:#ffd84a"></span>興奮（脱分極）</span><span><span class="dot" style="background:#ff9f1a"></span>刺激伝導系を伝わる電気</span><span><span class="dot" style="background:#4f86e8"></span>今の誘導が見ている範囲</span><span><span class="dot" style="background:#c8202c"></span>冠動脈（白い点＝血流）</span>${c.zone?'<span><span class="dot" style="background:#c0303a"></span>虚血部位（イメージ）</span>':''}</div>
+  <div class="leg"><span><span class="dot" style="background:#ffd84a"></span>興奮（脱分極）</span><span><span class="dot" style="background:#ff9f1a"></span>刺激伝導系を伝わる電気</span><span><span class="dot" style="background:#4f86e8"></span>今の誘導が見ている範囲</span><span><span class="dot" style="background:#c8202c"></span>冠動脈（白い点＝血流）</span>${c.zone?`<span><span class="dot" style="background:#4a0710"></span>${(HWM[c.id]??1)>1.3?'動きが止まり、収縮期に外へふくらむ部位':(HWM[c.id]??1)>=1?'虚血で動かない部位（壁運動異常）':'虚血で動きが弱い部位'}</span>`:''}</div>
   <div class="mut" style="margin:8px 0 4px">再生速度</div><div class="seg">${[1,.5,.25].map(k=>`<button data-sp="${k}" class="${hSpeed===k?'on':''}">${k===1?'等速':k+'倍'}</button>`).join('')}</div>
   ${c.cor?`<div class="fb ng" style="margin-top:8px"><b>責任冠動脈：</b>${CORN[c.cor[0]]}${c.cor[1]==='prox'?'の近位部':c.cor[1]==='dist'?'の遠位部':''}が${c.cor[1]==='sten'?'狭くなり（狭窄）、心筋への血流が足りない状態':c.cor[1]==='old'?'閉塞したあとの状態（梗塞後）':'閉塞'}。${c.cor[1]==='sten'?'':'✕より先の血管（灰色の点線）に血液が流れていません。'}</div>`:''}
   <div class="sm">黄色く光る＝電気的な興奮、少し縮む＝収縮。刺激伝導系は心臓を透かして表示しています。冠動脈の走行や太さには個人差があります（このデータは後下行枝がLCxから出る左冠動脈優位型）。</div><div class="sm">心臓の3Dデータ：BodyParts3D（© ライフサイエンス統合データベースセンター、CC BY-SA 2.1 JP）を加工して使用</div>`};
