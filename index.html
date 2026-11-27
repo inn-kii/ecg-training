@@ -62,6 +62,34 @@ ul.pts{margin:6px 0 0;padding-left:1.2em}ul.pts li{margin:2px 0}
 .lsel{display:grid;grid-template-columns:repeat(2,46px);gap:5px}.lsel .t{grid-column:span 2;font-size:11px;color:var(--mut);text-align:center;font-weight:700}
 .lsel button{min-height:38px;padding:0;border-radius:8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .lsel button.on{background:#1d5fd0;border-color:#1d5fd0;color:#fff}
+.homeview{background:#070d18}.homeview header{display:none}.homeview main{max-width:760px;padding:0}
+.hero{position:relative;padding:26px 20px 18px;background:radial-gradient(120% 90% at 0% 0%,#123058 0%,#0a1426 55%,#070d18 100%);overflow:hidden;color:#e9f0fa}
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(78,240,122,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(78,240,122,.06) 1px,transparent 1px);background-size:16px 16px}
+.hero h1{position:relative;margin:0;font-size:30px;font-weight:900;line-height:1.2}.hero p{position:relative;margin:4px 0 0;color:#8fb0d6;font-size:14px;font-weight:700}
+.hero svg{position:relative;display:block;width:100%;height:56px;margin-top:10px;filter:drop-shadow(0 0 6px rgba(78,240,122,.7))}
+.ecgline{fill:none;stroke:#4ef07a;stroke-width:2.4;stroke-linejoin:round;stroke-dasharray:760;stroke-dashoffset:760;animation:sweep 2.6s linear infinite}
+@keyframes sweep{0%{stroke-dashoffset:760}75%{stroke-dashoffset:0}100%{stroke-dashoffset:0;opacity:.2}}
+.hm{padding:18px 14px 28px;color:#e9f0fa}
+.hm .sec{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900;color:#7f93b0;margin:0 4px 10px;letter-spacing:.08em}.hm .sec:after{content:"";flex:1;height:1px;background:#1e2a40}
+.hm .blk{display:grid;gap:10px;margin-bottom:26px}
+.hcard{position:relative;display:flex;align-items:center;gap:14px;width:100%;min-height:84px;padding:16px;border-radius:18px;border:1px solid #22304a;background:linear-gradient(150deg,#131d31,#0d1526);color:#e9f0fa;font:inherit;text-align:left;overflow:hidden;cursor:pointer}
+.hcard:focus-visible{outline:3px solid #8fb4ff;outline-offset:2px}.hcard:active{transform:scale(.99)}.hcard[disabled]{opacity:.55;cursor:default}
+.hcard .ic{flex:none;width:54px;height:54px;border-radius:16px;display:grid;place-items:center}
+.hcard .t{display:block;font-size:23px;font-weight:900;line-height:1.15}.hcard .s{display:block;font-size:14px;color:#8a9bb5;margin-top:3px;font-weight:700}
+.hcard .ar{margin-left:auto;color:#53647f;font-size:28px;font-weight:300}
+.hmain{padding:20px 16px;border-color:rgba(78,240,122,.45);background:linear-gradient(140deg,#0f2a22 0%,#0d1a2a 70%);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.hmain .num{position:absolute;right:46px;top:50%;transform:translateY(-50%);font-size:76px;font-weight:900;color:rgba(78,240,122,.13);letter-spacing:-.04em;pointer-events:none}.hmain .t{font-size:26px}
+.hm .badge{display:inline-grid;place-items:center;min-width:30px;height:26px;padding:0 9px;border-radius:13px;background:#ff4d5a;color:#fff;font-size:15px;font-weight:900;margin-left:8px;vertical-align:4px;box-shadow:0 0 12px rgba(255,77,90,.6)}
+.hall{border-color:rgba(111,155,255,.45);background:linear-gradient(140deg,#102046 0%,#0d1526 70%)}.hall .num{position:absolute;right:44px;top:50%;transform:translateY(-52%);font-size:70px;font-weight:900;color:rgba(111,155,255,.17);letter-spacing:-.01em;pointer-events:none}
+.hweak{border-color:rgba(255,77,90,.45);background:linear-gradient(140deg,#2a1018 0%,#0d1526 70%)}.hweak .tgt{position:absolute;right:30px;top:50%;transform:translateY(-50%);opacity:.22;pointer-events:none}
+.hsmall{min-height:70px;padding:12px 14px}.hsmall .ic{width:44px;height:44px;border-radius:13px}.hsmall .t{font-size:20px}.hsmall .bi{font-size:20px;font-weight:900;color:#0b1220}.hm .bas{gap:8px}
+.basic{font-size:17px;line-height:1.65}.basic .bl{margin:4px 0 0;padding-left:1.2em}.basic .bl li{margin:6px 0}
+.steps{margin:0;padding-left:1.4em}.steps li{margin:9px 0}
+.bt{width:100%;border-collapse:collapse;font-size:16px;margin:6px 0}.bt th{text-align:left;background:light-dark(#e8edf3,#22304a);padding:8px}.bt td{padding:8px;border-top:1px solid var(--line)}
+.tip{margin:12px 0;padding:12px 14px;border-radius:12px;background:light-dark(#fff6e0,#33290f);border:1.5px solid #f5a524;font-size:16px}
+.hzukan{padding:22px 16px;border-color:#2a4a86;background:linear-gradient(140deg,#14244a,#0d1526 75%)}.hzukan .t{font-size:26px}
+.hm .foot{font-size:12px;color:#5d6e88;text-align:center}
+@media (prefers-reduced-motion:reduce){.ecgline{animation:none;stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
 <header><h1>心電図トレーニング</h1><button class="btn" id="home">ホーム</button></header>
@@ -241,8 +269,8 @@ const C=[
 {id:'q_peri',cat:'mimic',n:'急性心膜炎',lead:'II',acc:['II','CM5','CM4'],dx:['q_myoc','ste','stei'],sc:'数日前から胸痛が続く20代。深呼吸で痛みが強くなり、前かがみになると楽になる。',
  pts:['ほぼ全部の誘導で、下に凸（凹型）のST上昇','PR部分の低下（aVRでは逆にSTが低下しPRが上昇）','鏡像のST低下がない（aVR・V1を除く）のが心筋梗塞との違い','前かがみで楽になる・深呼吸で増悪する胸痛が特徴'],
  gen:s=>reg(.3,60/rn(90,110),t=>{beat(s,t,{st:.15,stD:[.45,.55,.7],ta:.32,tD:[.45,.55,.7],tc:.24,t1:.06,t2:.04});PL(s,-.06,t-.09,t-.04,.01,D.P)},.01)},
-{id:'q_tako',cat:'mimic',n:'たこつぼ心筋症',lead:'CM3',acc:['CM2','CM3','CM4'],dx:['ste','hat','extant'],sc:'親族の葬儀の直後から胸苦しさを訴える70代女性。',
- pts:['前壁の心筋梗塞とよく似たST上昇（数日後に深い陰性T波・QT延長）','強い精神的・身体的ストレスの後、高齢女性に多い','冠動脈に閉塞がないのに、左室の心尖部が動かなくなる（たこつぼ型）','心電図だけでは心筋梗塞と区別できない。STEMIとして扱う'],
+{id:'q_tako',cat:'myo',zone:'apex',n:'たこつぼ心筋症',lead:'CM3',acc:['CM2','CM3','CM4'],dx:['ste','hat','extant'],sc:'親族の葬儀の直後から胸苦しさを訴える70代女性。',
+ pts:['発症直後は前壁の心筋梗塞とよく似たST上昇、数日後は深い陰性T波とQT延長（表示は毎回どちらか）','強い精神的・身体的ストレスの後、高齢女性に多い','冠動脈に閉塞がないのに、左室の心尖部が動かなくなり風船のようにふくらむ（たこつぼ型）','心電図だけでは心筋梗塞と区別できない。現場ではSTEMIとして扱う'],pw:'前壁〜心尖部の変化はCM2〜CM4で見る。心臓の図では、冠動脈に閉塞がないこと（血流は正常）と、心尖部の動かない範囲を確認。',
  gen:s=>reg(.35,60/rn(80,100),t=>beat(s,t,{st:.18,stD:[.3,.3,.9],ta:.25,tD:[.3,.3,.9],tc:.32,t1:.08,t2:.05}),.01)},
 {id:'q_pe',cat:'lung',n:'肺血栓塞栓症',lead:'CM1',acc:['CM1','II'],dx:['stach','rbbb','q_tako'],sc:'長時間の飛行機移動のあとから息苦しさを訴える50代。',
  pts:['洞頻脈が最も多い所見（頻脈だけのことも多い）','SⅠQⅢTⅢ（Ⅰの深いS波、ⅢのQ波と陰性T波）','V1〜V3（CM1〜CM3）の陰性T波、右脚ブロック（右心負荷）','右軸偏位、肺性P波（Ⅱで尖った高いP波）','心電図が正常に近いことも多い。症状・経過・SpO2低下で疑う（表示される所見は毎回変わります）'],
@@ -361,9 +389,10 @@ VG.q_pe=s=>{const ty=pick(['tach','s1q3t3','rbbb','raxis']),rr=60/rn(100,130);
   if(ty==='s1q3t3'){G(s,.15,t-.025,.008,.008,[.5,-.85,0]);G(s,.32,t+.03,.012,.012,[-1,.15,0]);G(s,-.22,t+.23,.05,.04,[-.45,.85,.2])}
   if(ty==='rbbb'){G(s,1.0,t+.05,.018,.024,D.RB);G(s,-.3,t+.25,.05,.04,[-.3,.6,.8])}
  },.01)};
+VG.q_tako=s=>{if(Math.random()<.5)reg(.35,60/rn(80,100),t=>beat(s,t,{st:.18,stD:[.3,.3,.9],ta:.25,tD:[.3,.3,.9],tc:.32,t1:.08,t2:.05}),.01);else reg(.35,60/rn(65,85),t=>beat(s,t,{st:.03,stD:[.3,.3,.9],ta:-.45,tD:[.3,.35,.88],tc:.42,t1:.09,t2:.07}),.01)};
 C.forEach(c=>{if(VG[c.id])c.gen=VG[c.id]});
 
-const CATS={rate:'心拍数・調律',av:'房室ブロック・ペーシング',pvc:'期外収縮',lethal:'致死性不整脈・心停止',cond:'伝導異常・QT',st:'虚血（ST・T波）',el:'電解質・体温',art:'アーチファクト（ノイズ）',lung:'右心負荷（肺血栓塞栓症）',valve:'弁膜症',mech:'心筋梗塞の合併症'};
+const CATS={rate:'心拍数・調律',av:'房室ブロック・ペーシング',pvc:'期外収縮',lethal:'致死性不整脈・心停止',cond:'伝導異常・QT',st:'虚血（ST・T波）',el:'電解質・体温',art:'アーチファクト（ノイズ）',lung:'右心負荷（肺血栓塞栓症）',myo:'心筋の病気',valve:'弁膜症',mech:'心筋梗塞の合併症'};
 const LN={II:'標準貼り（Ⅱ誘導）',CM1:'CM1（V1相当）',CM2:'CM2（V2相当）',CM3:'CM3（V3相当）',CM4:'CM4（V4相当）',CM5:'CM5（V5相当）',CM6:'CM6（V6相当）',CM4R:'CM4R（V4R相当）',aVR:'aVR相当（赤と緑を入れ替え）'};
 const COL={r:['赤','#d62b2b','#fff'],y:['黄','#e8b600','#222'],g:['緑','#1f9d4a','#fff']};
 const STD_PL={II:{r:'RSC',y:'LSC',g:'LLA'}};['CM1','CM2','CM3','CM4','CM5','CM6','CM4R'].forEach(k=>STD_PL[k]={r:'MAN',y:'RSC',g:k});STD_PL.aVR={r:'LLA',y:'LSC',g:'RSC'};
@@ -386,14 +415,17 @@ function pairName(p,n){
 function cfg(pl,set){if(set!=='II')return null;for(const k in STD_PL){const s=STD_PL[k];if(pl.r===s.r&&pl.y===s.y&&pl.g===s.g)return k}return null}
 
 let anim=0,cur=null;
+let SW0=0;
 function drawStrip(cv,pr,lab,animate){
  cancelAnimationFrame(anim);
  const W=cv.parentElement.clientWidth,pxm=W/4*.4,h0=Math.round(4.4*pxm),pxm2=pxm*.6,h1=Math.round(4.2*pxm2),H=h0+h1,dpr=window.devicePixelRatio||1;
- const ROWS=[{a:0,b:4,top:0,h:h0,m:pxm,lab:'0〜4秒'},{a:0,b:DUR,top:h0,h:h1,m:pxm2,lab:'0〜15秒（全体・縮小）'}];
+ const ROWS=[{a:0,b:4,top:0,h:h0,m:pxm,lab:''},{a:0,b:DUR,top:h0,h:h1,m:pxm2,lab:'0〜15秒（全体・縮小）'}];
+ const fm=v=>(Math.round(v*10)/10).toString();
  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';cv._g={W,h0,h1};
  const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
  const ln=(x0,y0,x1,y1,c,w)=>{x.strokeStyle=c;x.lineWidth=w;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke()};
  const paint=p=>{
+  ROWS[0].a=SW0;ROWS[0].b=SW0+4;ROWS[0].lab=fm(SW0)+'〜'+fm(SW0+4)+'秒';
   x.fillStyle='#fff5f6';x.fillRect(0,0,W,H);
   const st=pxm*.1;
   for(let j=0;j*st<=h0+1;j++)ln(0,j*st,W,j*st,j%5?'#f7d6db':'#eda2ad',j%5?.5:1);
@@ -403,7 +435,7 @@ function drawStrip(cv,pr,lab,animate){
   for(let i=0;i<=R1.b;i++)ln(i*s1,h0,i*s1,H,i%5?'#efb5be':'#d98896',i%5?.6:1.3);
   ln(0,h0,W,h0,'#c97483',2);
   /* 上段の範囲を下段に示す */
-  x.fillStyle='rgba(29,58,100,.08)';x.fillRect(0,h0,4*s1,h1);
+  x.fillStyle='rgba(29,98,220,.13)';x.fillRect(SW0*s1,h0,4*s1,h1);x.strokeStyle='rgba(29,98,220,.75)';x.lineWidth=2;x.strokeRect(SW0*s1+1,h0+1,4*s1-2,h1-2);
   x.font='700 12px "Noto Sans JP",sans-serif';
   ROWS.forEach((R,r)=>{const top=R.top;if(r===0){x.fillStyle='rgba(255,245,246,.88)';const tw=Math.min(W-90,x.measureText(lab).width);x.fillRect(4,top+3,tw+8,18);x.fillStyle='#14233b';x.fillText(lab,8,top+16,W-94)}
    const t2=R.lab,w2=x.measureText(t2).width;x.fillStyle='rgba(255,245,246,.88)';x.fillRect(W-w2-10,top+3,w2+8,18);x.fillStyle='#8a4a55';x.fillText(t2,W-w2-6,top+16)});
@@ -414,6 +446,13 @@ function drawStrip(cv,pr,lab,animate){
    for(let i=i0;i<i1;i++){const px=(i/FS-R.a)*pxs,py=Math.min(top+R.h-2,Math.max(top+2,b-pr.y[i]*R.m));i===i0?x.moveTo(px,py):x.lineTo(px,py)}x.stroke();
    x.lineWidth=r?.9:1.3;pr.sp.forEach(q=>{if(q.t<R.a||q.t>=i1/FS)return;const px=(q.t-R.a)*pxs;x.beginPath();x.moveTo(px,b);x.lineTo(px,Math.min(top+R.h-2,Math.max(top+2,b-q.v*R.m)));x.stroke()})});
  };
+ /* 下段をなぞる／上段をスライドすると、上段の4秒の範囲が動く */
+ cv.style.touchAction='pan-y';cv.style.cursor='ew-resize';
+ const s1=W/DUR,pxs0=W/4,clampW=v=>Math.max(0,Math.min(DUR-4,v));
+ const setFrom=(e)=>{const r=cv.getBoundingClientRect(),xx=e.clientX-r.left,d=cv._drag;if(!d)return;SW0=d.bottom?clampW(xx/s1-2):clampW(d.w0-(xx-d.x0)/pxs0);cancelAnimationFrame(anim);paint(1)};
+ cv.onpointerdown=e=>{const r=cv.getBoundingClientRect();cv._drag={bottom:e.clientY-r.top>h0,x0:e.clientX-r.left,w0:SW0};try{cv.setPointerCapture(e.pointerId)}catch(_){}setFrom(e)};
+ cv.onpointermove=e=>{if(cv._drag)setFrom(e)};
+ cv.onpointerup=cv.onpointercancel=()=>{cv._drag=null};
  if(!animate||window.matchMedia('(prefers-reduced-motion: reduce)').matches){paint(1);return}
  const t0=performance.now(),Dm=5000;
  const step=n=>{const p=Math.min(1,(n-t0)/Dm);paint(p);if(p<1)anim=requestAnimationFrame(step)};anim=requestAnimationFrame(step)}
@@ -840,10 +879,11 @@ uniform vec3 uCol;uniform vec3 uEx;uniform float uExK;uniform float uZoneOn;unif
 void main(){vec3 n=normalize(vN);if(n.z<0.0)n=-n;vec3 L=normalize(vec3(-0.45,-0.6,0.66));
  float lam=0.4+0.6*max(dot(n,L),0.0);float sp=pow(max(dot(n,normalize(L+vec3(0.0,0.0,1.0))),0.0),28.0)*0.28;float rim=pow(1.0-n.z,2.0)*0.18;
  vec3 c=uCol;
- if(uZoneOn>0.5)c=mix(c,vec3(0.62,0.09,0.13),vZ*0.6);
- if(uViewOn>0.5){float v=smoothstep(0.45,0.9,dot(vR,uView));c=mix(c,vec3(0.32,0.52,0.92),v*0.55);}
+ float zz=uZoneOn>0.5?smoothstep(0.05,0.5,vZ):0.0;
+ if(uViewOn>0.5){float v=smoothstep(0.45,0.9,dot(vR,uView));c=mix(c,vec3(0.32,0.52,0.92),v*0.5*(1.0-zz));}
+ if(uZoneOn>0.5)c=mix(c,vec3(0.24,0.01,0.03),zz*0.92);
  if(uArt>0.5){if(vD>uDead){c=vec3(0.48,0.51,0.56);}else{float s=fract(vD/26.0-uT*0.9);if(s<0.16)c=mix(c,vec3(1.0),0.75);}}
- c=mix(c,uEx,uExK);
+ c=mix(c,uEx,uExK*(1.0-zz*0.85));
  gl_FragColor=vec4(c*(lam-rim)+sp,uA);}`;
   const sh=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s};
   const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');
@@ -853,12 +893,13 @@ void main(){vec3 n=normalize(vN);if(n.z<0.0)n=-n;vec3 L=normalize(vec3(-0.45,-0.
   Object.assign(HGL,{ok:true,cv,gl,pr,loc,parts,G});
  }catch(e){HGL.fail=1;HGL.err=String(e);return false}
  return true}
-const HZ={ant:(g,r)=>g==='LV'&&r[2]>.4,inf:(g,r)=>(g==='LV'||g==='RV')&&r[1]>.5,lat:(g,r)=>g==='LV'&&r[0]>.55&&r[1]<.35,hlat:(g,r)=>g==='LV'&&r[0]>.4&&r[1]<0,post:(g,r)=>g==='LV'&&r[2]<-.45&&r[1]>-.3,sub:(g,r)=>g==='LV'&&r[0]>.3,
- rv:(g,r)=>g==='RV'||(g==='LV'&&r[1]>.55),apex:(g,r,p)=>(g==='LV'||g==='RV')&&Math.hypot(p[0]-HGL.G.LVapex[0],p[1]-HGL.G.LVapex[1],p[2]-HGL.G.LVapex[2])<34,
- extant:(g,r)=>(g==='LV'&&(r[2]>.25||r[0]>.55))||(g==='RV'&&r[2]>.5&&r[0]>-.3),infpost:(g,r)=>((g==='LV'||g==='RV')&&r[1]>.5)||(g==='LV'&&r[2]<-.45&&r[1]>-.3),lmt:(g)=>g==='LV'};
+const HZ={ant:(l,r)=>l&&r[2]>.3,inf:(l,r,q)=>l?r[1]>.5:q[1]>.5,lat:(l,r)=>l&&r[0]>.55&&r[1]<.35,hlat:(l,r)=>l&&r[0]>.4&&r[1]<0,post:(l,r)=>l&&r[2]<-.45&&r[1]>-.3,sub:(l)=>l,
+ rv:(l,r)=>!l||r[1]>.55,apex:(l,r,q,p)=>Math.hypot(p[0]-HGL.G.LVapex[0],p[1]-HGL.G.LVapex[1],p[2]-HGL.G.LVapex[2])<38,
+ extant:(l,r,q)=>l?(r[2]>.15||r[0]>.55):(q[2]>.5&&q[0]>-.3),infpost:(l,r,q)=>l?(r[1]>.5||(r[2]<-.45&&r[1]>-.3)):q[1]>.5,lmt:(l)=>l};
+let hglLADx=null;function hglIsL(P){const G=HGL.G;if(!hglLADx){hglLADx={};const acc={};HGL.parts.forEach(q=>{if(q.s!=='LAD')return;for(let i=0;i<q.nv;i++){const k=Math.round(q.P[i*3+1]/4);(acc[k]=acc[k]||[]).push(q.P[i*3])}});for(const k in acc){const a=acc[k];hglLADx[k]=Math.max(...a)}}if(P[2]>G.VEN[2]-2){let k=Math.round(P[1]/4),t=0;while(hglLADx[k]===undefined&&t<30){k+=(k*4<G.VEN[1]?1:-1);t++}if(hglLADx[k]!==undefined)return P[0]>hglLADx[k]-1}return (P[0]-G.SEP[0])-0.3*(P[2]-G.SEP[2])>0}
 let hglZone=null;
 function hglSetCase(c){if(!HGL.ok)return;const gl=HGL.gl,f=c.zone&&HZ[c.zone];if(hglZone===(c.zone||''))return;hglZone=c.zone||'';
- HGL.parts.forEach(p=>{if(p.c!=='LV'&&p.c!=='RV')return;for(let i=0;i<p.nv;i++){p.Z[i]=f&&f(p.c,[p.Rd[i*3],p.Rd[i*3+1],p.Rd[i*3+2]],[p.P[i*3],p.P[i*3+1],p.P[i*3+2]])?1:0}gl.bindBuffer(gl.ARRAY_BUFFER,p.bZ);gl.bufferData(gl.ARRAY_BUFFER,p.Z,gl.STATIC_DRAW)})}
+ HGL.parts.forEach(p=>{if(p.c!=='LV'&&p.c!=='RV')return;for(let i=0;i<p.nv;i++){const P3=[p.P[i*3],p.P[i*3+1],p.P[i*3+2]],G=HGL.G;p.Z[i]=f&&f(p.c==='LV'||hglIsL(P3),nz([P3[0]-G.LV[0],P3[1]-G.LV[1],P3[2]-G.LV[2]]),[p.Rd[i*3],p.Rd[i*3+1],p.Rd[i*3+2]],P3)?1:0}gl.bindBuffer(gl.ARRAY_BUFFER,p.bZ);gl.bufferData(gl.ARRAY_BUFFER,p.Z,gl.STATIC_DRAW)})}
 /* 閉塞の位置（起始部からの距離mm） */
 function hglDead(c){if(!c.cor)return null;const G=HGL.G,[a,t]=c.cor;let lm=0;HGL.parts.forEach(p=>{if(p.s==='LMT')for(let i=0;i<p.nv;i++)lm=Math.max(lm,p.D[i])});
  const T={LAD:{occ:lm+7,old:lm+7,prox:lm+3,sten:lm+38,dist:G.maxD.LAD*.62},RCA:{prox:10,mid:G.maxD.RCA*.42,dist:G.maxD.RCA*.72},LCX:{occ:lm+16},DG:{occ:lm+30},LMT:{occ:lm*.5}};
@@ -902,7 +943,7 @@ function hglDraw(glcv,c,S,W,H,sc,off){
  if(hSee){gl.depthMask(false);HGL.parts.forEach(p=>{if(WALL[p.c])wall(p,.24)});gl.depthMask(true)}
  if(hCond){gl.disable(gl.DEPTH_TEST);HGL.parts.forEach(p=>{if(p.c!=='COND')return;const on={SA:S.sa,IN:S.inn,AV:S.av,HIS:S.his,RB:S.rb,LB:S.lb}[p.s];
   const blocked=(c.blk==='R'&&p.s==='RB')||(c.blk==='L'&&p.s==='LB');draw(p,blocked?[.5,.5,.56]:on?[1,.62,.1]:[.85,.72,.72],0,1,G.VEN,false,1e9,on?1:blocked?.7:.32)});gl.enable(gl.DEPTH_TEST)}
- g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,glcv.width,glcv.height);g2.drawImage(gl.canvas,0,0);
+ g2.setTransform(1,0,0,1,0,0);g2.clearRect(0,0,glcv.width,glcv.height);{const bw=glcv.width,bh=glcv.height,st=Math.max(10,Math.round(bw/24));g2.fillStyle='#eceff3';g2.fillRect(0,0,bw,bh);g2.strokeStyle='#d3d8e0';g2.lineWidth=Math.max(1,bw/600);g2.beginPath();for(let x=st/2;x<bw;x+=st){g2.moveTo(x,0);g2.lineTo(x,bh);}for(let y=st/2;y<bh;y+=st){g2.moveTo(0,y);g2.lineTo(bw,y);}g2.stroke();const rg=g2.createRadialGradient(bw/2,bh*.86,0,bw/2,bh*.86,bw*.34);rg.addColorStop(0,'rgba(60,70,90,.22)');rg.addColorStop(1,'rgba(60,70,90,0)');g2.save();g2.translate(bw/2,bh*.86);g2.scale(1,.22);g2.translate(-bw/2,-bh*.86);g2.fillStyle=rg;g2.beginPath();g2.arc(bw/2,bh*.86,bw*.34,0,7);g2.fill();g2.restore();}g2.drawImage(gl.canvas,0,0);
  return dead}
 
 let hVes=false,hSee=false;
@@ -957,28 +998,122 @@ function draw3DGL(cv,c,S){
  x.font='700 12px "Noto Sans JP",sans-serif';x.fillStyle='#7d8a9c';const fr=Math.cos(hRot.y)>0;x.fillText(fr?'患者の右':'患者の左',8,16);x.textAlign='right';x.fillText(fr?'患者の左':'患者の右',W-8,16);x.textAlign='left';
 }
 
+
+/* ---- 心電図の基礎（ホームから開くページ） ---- */
+const BASICS=[
+ {id:'read',t:'12誘導の読み方',s:'見る順番と正常値',col:'#f5a524'},
+ {id:'put12',t:'12誘導の貼り方',s:'電極の位置と色',col:'#1f9d4a'},
+ {id:'limb',t:'近似四肢誘導',s:'3点モニターのしくみ',col:'#2d6ad6'},
+ {id:'sub',t:'12誘導がないとき',s:'3点モニターで代用する方法',col:'#ff4d5a'},
+ {id:'mean',t:'各誘導の意味',s:'見ている場所と冠動脈',col:'#8a5cf6'}];
+function beatSVG(){/* 1拍の模式図：波の名前と間隔 */
+ const g=[];for(let i=0;i<=60;i++)g.push(`<line x1="${i*6}" y1="0" x2="${i*6}" y2="150" stroke="${i%5?'#f7d6db':'#eda2ad'}" stroke-width="${i%5?.5:1}"/>`);for(let j=0;j<=25;j++)g.push(`<line x1="0" y1="${j*6}" x2="360" y2="${j*6}" stroke="${j%5?'#f7d6db':'#eda2ad'}" stroke-width="${j%5?.5:1}"/>`);
+ const p='M10 100 L40 100 C48 100 50 88 58 88 C66 88 68 100 76 100 L96 100 L100 106 L110 20 L120 118 L126 100 L150 100 C170 100 176 70 196 70 C214 70 220 100 236 100 L262 100 C268 100 270 94 276 94 C282 94 284 100 290 100 L350 100';
+ const lab=(x,y,t,c)=>`<text x="${x}" y="${y}" font-size="15" font-weight="900" fill="${c||'#14233b'}" text-anchor="middle">${t}</text>`;
+ const span=(x1,x2,y,t,c)=>`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${c}" stroke-width="2.5"/><line x1="${x1}" y1="${y-5}" x2="${x1}" y2="${y+5}" stroke="${c}" stroke-width="2.5"/><line x1="${x2}" y1="${y-5}" x2="${x2}" y2="${y+5}" stroke="${c}" stroke-width="2.5"/>`+lab((x1+x2)/2,y-7,t,c);
+ return `<svg viewBox="0 0 360 190" style="width:100%;display:block;background:#fff5f6;border-radius:10px" role="img" aria-label="心電図1拍の各部の名前">${g.join('')}<path d="${p}" fill="none" stroke="#121c30" stroke-width="2.4" stroke-linejoin="round"/>
+ ${lab(58,82,'P')}${lab(110,14,'QRS')}${lab(196,62,'T')}${lab(276,88,'U','#8a97a8')}${lab(132,96,'J','#7a3fd0')}
+ <line x1="126" y1="100" x2="150" y2="100" stroke="#7a3fd0" stroke-width="4"/>${lab(150,120,'ST','#7a3fd0')}
+ ${span(40,96,140,'PR','#1d5fd0')}${span(96,126,160,'QRS幅','#d62b2b')}${span(96,236,180,'QT','#1f9d4a')}</svg>`}
+function limbSVG(){/* 12誘導の四肢電極 */
+ return `<svg viewBox="0 0 240 230" style="width:100%;max-width:300px;display:block;margin:0 auto" role="img" aria-label="四肢電極の位置">
+ <g fill="none" stroke="#7d8a9c" stroke-width="3" stroke-linecap="round"><circle cx="120" cy="30" r="18"/><path d="M120 48 L120 130 M120 64 L66 110 M120 64 L174 110 M120 130 L86 210 M120 130 L154 210"/></g>
+ <text x="20" y="16" font-size="12" font-weight="700" fill="#7d8a9c">患者の右</text><text x="170" y="16" font-size="12" font-weight="700" fill="#7d8a9c">患者の左</text>
+ ${[[66,112,'#d62b2b','赤','右手'],[174,112,'#e8b600','黄','左手'],[154,210,'#1f9d4a','緑','左足'],[86,210,'#222','黒','右足']].map(([x,y,c,t,l])=>`<circle cx="${x}" cy="${y}" r="15" fill="${c}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${y+5}" font-size="13" font-weight="900" fill="${c==='#e8b600'?'#222':'#fff'}" text-anchor="middle">${t}</text><text x="${x+(x<120?-30:30)}" y="${y+5}" font-size="13" font-weight="700" fill="#14233b" text-anchor="middle">${l}</text>`).join('')}</svg>`}
+function monSVG(){return `<div class="body" style="max-width:340px;margin:0 auto">${bodySVG(STD_PL.II).replace(/<circle class="hit"[^>]*>/g,'')}</div>`}
+function cmSVG(){return `<div class="body" style="max-width:340px;margin:0 auto">${bodySVG({r:'MAN',y:'RSC',g:'CM5'}).replace(/<circle class="hit"[^>]*>/g,'')}</div>`}
+const bh=(t)=>`<h2 style="font-size:20px;margin:18px 0 8px">${t}</h2>`;
+const bl=a=>`<ul class="bl">${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+const btab=(head,rows)=>`<div class="scroll"><table class="bt"><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+function basicHTML(id){
+ if(id==='read')return `${beatSVG()}
+ ${bh('見る順番')}
+ <ol class="steps">
+ <li><b>心拍数</b>：300÷（R波とR波の間の大きいマスの数）<br><span class="mut">例：大きいマス4つ → 75/分</span></li>
+ <li><b>調律</b>：P波がある？ QRSと1対1？ RRは一定？</li>
+ <li><b>電気軸</b>：Ⅰ と aVF の向き</li>
+ <li><b>P波・PR</b>：PRは0.12〜0.20秒（小さいマス3〜5）</li>
+ <li><b>QRS</b>：幅0.12秒未満（小さいマス3未満）、異常Q波</li>
+ <li><b>ST</b>：上がっている？ 下がっている？ 隣り合う2誘導以上？</li>
+ <li><b>T波</b>：陰性T、高く尖ったT</li>
+ <li><b>QT</b>：RR間隔の半分以下が目安</li></ol>
+ ${bh('電気軸の見分け方')}
+ ${btab(['Ⅰ','aVF','電気軸'],[['上向き','上向き','正常'],['上向き','下向き','左軸偏位（Ⅱも下向きなら）'],['下向き','上向き','右軸偏位'],['下向き','下向き','高度な軸偏位']])}
+ ${bh('マス目の読み方')}
+ ${bl(['小さいマス：横0.04秒・縦0.1mV','大きいマス：横0.2秒・縦0.5mV','大きいマス5つ＝1秒'])}`;
+ if(id==='put12')return `${bh('四肢電極（4つ）')}${limbSVG()}
+ <div class="tip"><b>覚え方</b>：右手から時計回りに「<b>あ・き・み・く・ろ</b>」<br>赤（右手）→黄（左手）→緑（左足）→黒（右足）</div>
+ ${bh('胸部電極（6つ）')}<div class="body" style="max-width:360px;margin:0 auto">${chest12SVG()}</div>
+ ${btab(['電極','色','位置'],[['V1','赤','第4肋間 胸骨右縁'],['V2','黄','第4肋間 胸骨左縁'],['V3','緑','V2とV4の中点'],['V4','茶','第5肋間 左鎖骨中線'],['V5','黒','V4の高さ 左前腋窩線'],['V6','紫','V4の高さ 左中腋窩線']])}
+ <div class="tip"><b>覚え方</b>：「<b>せき・おう・みどり・ちゃ・こく・し</b>」（赤・黄・緑・茶・黒・紫）<br><b>コツ</b>：先にV1・V2（第4肋間）→V4（第5肋間）→その間にV3</div>
+ ${bh('肋間の探し方')}${bl(['胸骨角（ルイ角）の横が第2肋骨','その下が第2肋間 → 数えて第4肋間へ'])}`;
+ if(id==='limb')return `${monSVG()}
+ ${bh('3点モニターの基本')}
+ ${btab(['色','位置','役割'],[['赤','右鎖骨下','−（マイナス）'],['黄','左鎖骨下','アース／設定Ⅰ・Ⅲで使う'],['緑','左下腹部','＋（プラス）＝カメラ']])}
+ ${bh('モニターの誘導設定')}
+ ${btab(['設定','＋','−','12誘導でいうと'],[['Ⅰ','黄','赤','Ⅰ誘導'],['Ⅱ','緑','赤','Ⅱ誘導'],['Ⅲ','緑','黄','Ⅲ誘導']])}
+ ${bh('ポイント')}${bl(['手足のかわりに体幹に貼る＝<b>近似</b>四肢誘導','<b>Ⅱ誘導</b>がP波を一番見やすい → 不整脈の判断の基本','見えるのは1つの方向だけ。虚血の場所はわかりにくい','体動のノイズが入りにくい'])}`;
+ if(id==='sub')return `${cmSVG()}
+ ${bh('CM法（設定はⅡに固定）')}
+ ${btab(['電極','位置'],[['赤（−）','胸骨柄'],['黄（アース）','右鎖骨下'],['緑（＋）','見たい胸部誘導の位置']])}
+ ${btab(['緑の位置','名前','見る場所'],[['V1の位置','CM1','右室・中隔'],['V2の位置','CM2','前壁中隔'],['V3の位置','CM3','前壁'],['V4の位置','CM4','前壁・心尖部'],['V5の位置','CM5','前側壁（感度最高）'],['V6の位置','CM6','側壁'],['右V4の位置','CM4R','右室']])}
+ <div class="tip"><b>時間がない時</b>：CM2 → CM4 → CM5 の3か所だけ</div>
+ ${bh('そのほかの裏ワザ')}
+ ${bl(['<b>aVR相当</b>：赤と緑を入れ替え（赤＝左下腹部・緑＝右鎖骨下）','<b>Ⅰ誘導</b>：Ⅱ固定のまま 緑を左鎖骨下・黄を左下腹部へ','<b>後壁</b>：CM1〜CM3のST低下＋高いR波＝ミラーイメージ','<b>右室梗塞</b>：緑を右第5肋間鎖骨中線（CM4R）'])}
+ ${bh('申し送りの言い方')}<div class="tip">「3点モニターのCM法（赤＝胸骨柄、緑＝V4の位置、Ⅱ設定）でST上昇」<br><span class="mut">✕「V4でST上昇」とは言わない</span></div>`;
+ if(id==='mean')return `<div class="mut" style="margin-bottom:6px">誘導をタップ</div><div class="seg" id="bmk">${K12.map(k=>`<button data-bk="${k}" class="${k==='II'?'on':''}">${kLab(k)}</button>`).join('')}</div><div id="bmv"></div>
+ ${bh('見ている場所と冠動脈')}
+ ${btab(['誘導','見ている場所','責任冠動脈'],[['Ⅱ・Ⅲ・aVF','下壁','RCA（LCxのことも）'],['Ⅰ・aVL・V5・V6','側壁','LCx・LADの対角枝'],['V1・V2','中隔','LAD'],['V3・V4','前壁','LAD'],['aVR','右上から全体（広範な虚血）','LMT・多枝病変']])}
+ ${bh('鏡像（ミラーイメージ）の組み合わせ')}
+ ${bl(['下壁（Ⅱ・Ⅲ・aVF）⇔ 高位側壁（Ⅰ・aVL）','前壁（V1〜V3）⇔ 後壁','ST上昇の反対側にST低下が出たら梗塞の可能性が高い'])}`;
+ return ''}
+function basic(id){document.body.classList.remove('homeview');cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
+ const b=BASICS.find(x=>x.id===id);
+ app.innerHTML=`<div class="card"><span class="tag" style="background:${b.col}">心電図の基礎</span><h2 style="font-size:24px;margin:2px 0 0">${b.t}</h2></div><div class="card basic">${basicHTML(id)}</div>
+ <div class="row"><button class="btn pri" id="bhome">ホームへ</button></div>`;
+ app.querySelector('#bhome').onclick=home;
+ const mv=app.querySelector('#bmv');if(mv){const show=k=>{const v=view12(k);mv.innerHTML=`<div class="fb" style="margin:8px 0;background:light-dark(#e8f0fd,#15264a);border:1.5px solid #1d5fd0;font-size:17px"><b>${v.lab}</b>：${v.area}${leadFigHTML(v)}</div>`;app.querySelectorAll('[data-bk]').forEach(x=>x.classList.toggle('on',x.dataset.bk===k))};show('II');app.querySelectorAll('[data-bk]').forEach(x=>x.onclick=()=>show(x.dataset.bk))}
+ window.scrollTo(0,0)}
+
 const app=document.getElementById('app');
 let Q=null;
-function home(){cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
- app.innerHTML=`<div class="card"><h2>3点モニターで不整脈を見抜く練習</h2>
- <p class="mut" style="margin:0 0 10px">症例に合わせて電極を貼る → その貼り方で見える波形がその場で出る → 何の波形か当てる。全${C.length}波形。間違った場所に貼ると、その位置から見た波形（反転・形の変化）が出ます。</p>
- <div class="row"><button class="btn pri" data-go="10">10問チャレンジ</button><button class="btn pri" data-go="all">全${C.length}問</button></div>
- <div class="row" style="margin-top:8px"><button class="btn" id="lib">波形図鑑を見る（12誘導・心臓の動き）</button></div></div>
- <div class="card"><h2>貼り方のおさらい（設定Ⅱ）</h2><ul class="pts">
- <li><b>標準貼り（Ⅱ誘導）</b>：赤＝右鎖骨下／黄＝左鎖骨下／緑＝左下腹部</li>
- <li><b>CM法</b>：赤＝胸骨柄／黄＝右鎖骨下／緑＝見たい胸部誘導の位置</li>
- <li>緑（＋）が「カメラ」。調律はⅡ、脚ブロックはCM1、前壁はCM2〜4、虚血の感度最高はCM5</li><li>右室梗塞はCM4R（緑を右第5肋間鎖骨中線）。後壁はCM1〜3のミラーイメージ（ST低下＋R波増高）で判断</li></ul>
- <div class="sm">波形は学習用のシミュレーションです。心臓の電気の向きと電極の位置から計算していますが、実際の心電図とは細部が異なります。</div></div>`;
+/* 苦手（間違えた問題）の保存：この端末のブラウザ内だけ */
+const WK='ecgWeak';
+function weakGet(){try{const a=JSON.parse(localStorage.getItem(WK)||'[]');return Array.isArray(a)?a.filter(id=>C.some(c=>c.id===id)):[]}catch(e){return weakMem}}
+let weakMem=[];
+function weakSet(a){weakMem=a;try{localStorage.setItem(WK,JSON.stringify(a))}catch(e){}}
+function weakAdd(id){const a=weakGet();if(!a.includes(id)){a.push(id);weakSet(a)}}
+function weakDel(id){weakSet(weakGet().filter(x=>x!==id))}
+function home(){cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);document.body.classList.add('homeview');window.scrollTo(0,0);
+ const wk=weakGet(),nLib=C.filter(c=>CATS[c.cat]).length;
+ app.innerHTML=`<div class="hero"><div class="hgrid"></div><h1>心電図トレーニング</h1><p>3点モニター・12誘導・心臓の動き</p>
+ <svg viewBox="0 0 360 56" preserveAspectRatio="none" aria-hidden="true"><path class="ecgline" d="M0 34 L60 34 L70 30 L78 34 L96 34 L102 40 L110 6 L118 50 L124 34 L146 34 L160 26 L176 34 L230 34 L240 30 L248 34 L266 34 L272 40 L280 6 L288 50 L294 34 L316 34 L330 26 L346 34 L360 34"/></svg></div>
+ <div class="hm">
+ <div class="sec">QUIZ</div>
+ <div class="blk">
+  <button class="hcard hmain" data-go="10"><span class="ic" style="background:#4ef07a"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#06210f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l11 7-11 7z"/></svg></span><span><span class="t">ランダム10問</span><span class="s">毎回ちがう10問</span></span><span class="num">10</span><span class="ar">›</span></button>
+  <button class="hcard hall" data-go="all"><span class="ic" style="background:#2d6ad6"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M5 6h14M5 12h14M5 18h14"/></svg></span><span><span class="t">全問チャレンジ</span><span class="s">全${C.length}問</span></span><span class="num">All</span><span class="ar">›</span></button>
+  <button class="hcard hweak" id="weak" ${wk.length?'':'disabled'}><span class="ic" style="background:#ff4d5a"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/></svg></span><span><span class="t">弱点克服${wk.length?`<span class="badge">${wk.length}</span>`:''}</span><span class="s">${wk.length?'苦手な波形をなくす':'苦手はまだありません'}</span></span><svg class="tgt" width="92" height="92" viewBox="0 0 92 92" fill="none" stroke="#ff4d5a" stroke-width="4" aria-hidden="true"><circle cx="46" cy="46" r="34"/><circle cx="46" cy="46" r="18"/><circle cx="46" cy="46" r="4" fill="#ff4d5a"/><path d="M46 2v16M46 74v16M2 46h16M74 46h16" stroke-linecap="round"/></svg><span class="ar">›</span></button>
+ </div>
+ <div class="sec">LIBRARY</div>
+ <div class="blk">
+  <button class="hcard hzukan" id="lib"><span class="ic" style="background:#6f9bff"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0b1430" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M7.5 11.5h2l1-2 2 4 1-2h3"/></svg></span><span><span class="t">心電図図鑑</span><span class="s">${nLib}波形・12誘導・心臓の動き</span></span><span class="ar">›</span></button>
+ </div>
+ <div class="sec">BASICS</div>
+ <div class="blk bas">${BASICS.filter(b=>b.id==='mean').map(b=>`<button class="hcard hsmall" data-b="${b.id}"><span class="ic" style="background:${b.col}"><span class="bi">12</span></span><span><span class="t">${b.t}</span><span class="s">${b.s}</span></span><span class="ar">›</span></button>`).join('')}</div>
+ <div class="foot">学習用のシミュレーションです</div></div>`;
  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>start(b.dataset.go==='all'?shuf(C):shuf(C).slice(0,10)));
- app.querySelector('#lib').onclick=lib}
-function start(list,m12){cancelAnimationFrame(hAnim);Q={list,i:0,dOK:0,pOK:0,aOK:0,wrong:[],m12:!!m12};nextQ()}
-function nextQ(){const c=Q.list[Q.i];Object.assign(Q,{c,s:sig(c),st:{pl:Object.assign({},STD_PL.II),set:'II',cc:'g'},ans:null,op:opts(c),shown:false,act:null,aop:actOpts(c)});Q.m12?renderQ12():renderQ();window.scrollTo(0,0)}
+ const wb=app.querySelector('#weak');if(wk.length)wb.onclick=()=>start(shuf(C.filter(c=>wk.includes(c.id))),false,true);
+ app.querySelector('#lib').onclick=lib;
+ app.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>basic(b.dataset.b))}
+function start(list,m12,weak){cancelAnimationFrame(hAnim);document.body.classList.remove('homeview');Q={list,i:0,dOK:0,pOK:0,aOK:0,wrong:[],m12:!!m12,weak:!!weak};nextQ()}
+function nextQ(){SW0=0;const c=Q.list[Q.i];Object.assign(Q,{c,s:sig(c),st:{pl:Object.assign({},STD_PL.II),set:'II',cc:'g'},ans:null,op:opts(c),shown:false,act:null,aop:actOpts(c)});Q.m12?renderQ12():renderQ();window.scrollTo(0,0)}
 function renderQ(){
  const c=Q.c,n=Q.list.length,y=window.scrollY;
  let h=`<div class="mut">第${Q.i+1}問 ／ ${n}問</div><div class="prog"><i style="width:${Q.i/n*100}%"></i></div>
  <div class="card"><span class="tag">症例</span><div class="sc">${c.sc}</div></div>
  <div class="card" id="pn"><h2>電極を貼る</h2>${panelHTML(Q.st)}</div>
- <div class="card">${hrHTML(c,Q.s)}<div class="paper"><canvas id="cv"></canvas></div><div class="sm">上段：小さいマス＝0.04秒・0.1mV／大きいマス＝0.2秒・0.5mV<br>下段：15秒全体を縮小（縦線＝1秒・太線＝5秒、青い部分＝上段の範囲）</div>
+ <div class="card">${hrHTML(c,Q.s)}<div class="paper"><canvas id="cv"></canvas></div><div class="sm">下段の15秒をなぞると、青い枠の4秒が上段に大きく出ます（上段は左右にスライドでも移動）<br>上段：小さいマス＝0.04秒・0.1mV／大きいマス＝0.2秒・0.5mV</div>
  <div class="row" style="margin-top:6px"><button class="btn" id="rep">もう一度流す</button></div></div>
  <div class="card"><h2>この波形は？</h2>`;
  Q.op.forEach((o,k)=>{let cl='';if(Q.ans){if(o===c)cl='ok';else if(o===Q.ans)cl='ng'}h+=`<button class="ch ${cl}" data-k="${k}" ${Q.ans?'disabled':''}>${Q.ans?(o===c?'○ ':o===Q.ans?'✕ ':''):''}${o.n}</button>`});
@@ -989,7 +1124,7 @@ function renderQ(){
  const lab=stripFor(Q.st,Q.s,'cv',!Q.shown);Q.shown=true;Q.lab=lab;
  app.querySelector('#rep').onclick=()=>stripFor(Q.st,Q.s,'cv',true);
  bindPanel(app.querySelector('#pn'),Q.st,renderQ);
- app.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(Q.ans)return;Q.ans=Q.op[+b.dataset.k];const got=cfg(Q.st.pl,Q.st.set),ok=!!got&&c.acc.includes(got);Q.ansPl={lab:Q.lab,ok};if(ok)Q.pOK++;if(Q.ans===c)Q.dOK++;if(Q.ans!==c||!ok)Q.wrong.push(c);renderQ()});
+ app.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(Q.ans)return;Q.ans=Q.op[+b.dataset.k];const got=cfg(Q.st.pl,Q.st.set),ok=!!got&&c.acc.includes(got);Q.ansPl={lab:Q.lab,ok};if(ok)Q.pOK++;if(Q.ans===c){Q.dOK++;weakDel(c.id)}else weakAdd(c.id);if(Q.ans!==c||!ok)Q.wrong.push(c);renderQ()});
  app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{if(Q.act)return;Q.act=b.dataset.a;if(Q.act===ACTMAP[c.id])Q.aOK++;else if(!Q.wrong.includes(c))Q.wrong.push(c);renderQ()});
  const nx=app.querySelector('#nx');if(nx)nx.onclick=()=>{Q.i++;if(Q.i<Q.list.length)nextQ();else result()}}
 let cur12=null,cur12Sel=null;
@@ -1005,7 +1140,7 @@ function renderQ12(){
  cur=null;cur12=Q.s;cur12Sel=null;draw12(document.getElementById('c12'),Q.s);
  app.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{if(Q.ans)return;Q.ans=Q.op[+b.dataset.k];if(Q.ans===c)Q.dOK++;else Q.wrong.push(c);renderQ12()});
  const nx=app.querySelector('#nx');if(nx)nx.onclick=()=>{Q.i++;if(Q.i<Q.list.length)nextQ();else result()}}
-function result(){cur=null;const n=Q.list.length;
+function result(){document.body.classList.remove('homeview');cur=null;const n=Q.list.length;
  app.innerHTML=`<div class="card"><h2>結果</h2><div class="row" style="gap:20px"><div><div class="mut">波形の判定</div><div class="big">${Q.dOK}<span style="font-size:20px"> / ${n}</span></div></div>${Q.m12?'':`<div><div class="mut">貼り方（回答時）</div><div class="big">${Q.pOK}<span style="font-size:20px"> / ${n}</span></div></div>`}</div></div>
  ${Q.wrong.length?`<div class="card"><h2>復習したい問題</h2><div class="lib">${Q.wrong.map(c=>`<button class="btn" data-id="${c.id}">${c.n}</button>`).join('')}</div><div class="row" style="margin-top:10px"><button class="btn pri" id="rw">この問題だけ解き直す</button></div></div>`:`<div class="card"><h2>全問正解！</h2><p class="mut" style="margin:0">次は全${C.length}問に挑戦してみましょう。</p></div>`}
  <div class="row"><button class="btn pri" id="ag">もう一度（10問）</button><button class="btn" id="hm">ホームへ</button></div>`;
@@ -1013,7 +1148,7 @@ function result(){cur=null;const n=Q.list.length;
  app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(C.find(x=>x.id===b.dataset.id)));
  const m12=Q.m12,rw=app.querySelector('#rw');if(rw)rw.onclick=()=>start(shuf(w),m12);
  app.querySelector('#ag').onclick=()=>start(shuf(C).slice(0,10),m12);app.querySelector('#hm').onclick=home;window.scrollTo(0,0)}
-function lib(){cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
+function lib(){document.body.classList.remove('homeview');cur=null;cancelAnimationFrame(anim);cancelAnimationFrame(hAnim);
  let h=`<div class="card"><h2>波形図鑑（全${C.length}）</h2><p class="mut" style="margin:0">タップで波形と特徴を表示。電極を動かして見え方の違いも確認できます。</p>`;
  for(const k in CATS)h+=`<div class="cat">${CATS[k]}</div><div class="lib">${C.filter(c=>c.cat===k).map(c=>`<button class="btn" data-id="${c.id}">${c.n}</button>`).join('')}</div>`;
  app.innerHTML=h+'</div>';app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(C.find(x=>x.id===b.dataset.id)));window.scrollTo(0,0)}
@@ -1022,15 +1157,15 @@ const VREG12={I:['Ⅰ誘導','高位側壁',[.85,-.45,.1]],II:['Ⅱ誘導','下�
  V1:['V1誘導','中隔・右室',[-.45,.1,.9]],V2:['V2誘導','前壁中隔',[-.05,.1,1]],V3:['V3誘導','前壁',[.3,.15,.95]],V4:['V4誘導','前壁・心尖部',[.45,.45,.8]],V5:['V5誘導','前側壁',[.75,.2,.6]],V6:['V6誘導','側壁',[.95,.1,.25]],V4R:['V4R誘導（右側胸部）','右室',[-.85,.3,.45]],V7:['V7誘導（背部）','後壁',[.55,.2,-.8]],V8:['V8誘導（背部）','後壁',[.25,.2,-.95]],V9:['V9誘導（背部）','後壁（中央寄り）',[0,.2,-1]]};
 const view12=k=>{const v=VREG12[k];return{key:/^V\d$/.test(k)?'CM'+k[1]:k==='V4R'?'CM4R':k,lab:v[0],area:v[1],d:nz(v[2])}};
 const kLab=k=>k==='I'?'Ⅰ':k==='II'?'Ⅱ':k==='III'?'Ⅲ':k;
-function detail(c){hRot.auto=true;hSee=!!(c.valve||c.mech);if(c.valve&&!c.mech){hCor=false;hCond=false;hRot.auto=false;hRot.y=2.4;hRot.x=-.4}else if(c.mech==='pmr'){hCond=false;hRot.auto=false;hRot.y=-1.1;hRot.x=-.3}else{hCor=true;hCond=true}const s=sig(c);hT0=performance.now();
+function detail(c){hRot.auto=false;hRot.y=-.7;hRot.x=-.5;hSee=!!(c.valve||c.mech);if(c.valve&&!c.mech){hCor=false;hCond=false;hRot.auto=false;hRot.y=2.4;hRot.x=-.4}else if(c.mech==='pmr'){hCond=false;hRot.auto=false;hRot.y=-1.1;hRot.x=-.3}else{hCor=true;hCond=true}const s=sig(c);hT0=performance.now();
  let hKey=c.lead==='II'?'II':c.lead==='CM4R'?'III':'V'+c.lead[2];
  const hcHTML=()=>{hView=view12(hKey);return `<h2>心臓の動き（シミュレーション）</h2>
   <div class="fb" style="margin:0 0 8px;background:light-dark(#e8f0fd,#15264a);border:1.5px solid #1d5fd0"><b>今見ている誘導：</b>${hView.lab}<br><b>見ている範囲：</b>${hView.area}${leadFigHTML(hView)}</div>
   <canvas id="mini" style="width:100%;height:104px;display:block;border-radius:8px;margin-bottom:10px" aria-label="ミニ心電図モニター"></canvas>
-  <div class="seg" style="margin-bottom:8px">${[['3d','立体'],['2d','平面']].map(m=>`<button data-hm="${m[0]}" class="${hMode===m[0]?'on':''}">${m[1]}</button>`).join('')}${hMode==='3d'?'<button id="front">正面に戻す</button>':''}</div><div class="mut" style="margin:0 0 4px">表示する項目（タップで表示／非表示）</div><div class="seg" style="margin-bottom:8px"><button id="corbtn" class="${hCor?'on':''}" aria-pressed="${hCor}">冠動脈</button><button id="cdbtn" class="${hCond?'on':''}" aria-pressed="${hCond}">刺激伝導系</button><button id="lbbtn" class="${hLab?'on':''}" aria-pressed="${hLab}">文字</button><button id="vesbtn" class="${hVes?'on':''}" aria-pressed="${hVes}">大血管</button><button id="seebtn" class="${hSee?'on':''}" aria-pressed="${hSee}">中を見る（弁）</button></div>
+  <div class="seg" style="margin-bottom:8px">${[['3d','立体'],['2d','平面']].map(m=>`<button data-hm="${m[0]}" class="${hMode===m[0]?'on':''}">${m[1]}</button>`).join('')}${hMode==='3d'?'<button id="front">正中に戻す</button>':''}</div><div class="mut" style="margin:0 0 4px">表示する項目（タップで表示／非表示）</div><div class="seg" style="margin-bottom:8px"><button id="corbtn" class="${hCor?'on':''}" aria-pressed="${hCor}">冠動脈</button><button id="cdbtn" class="${hCond?'on':''}" aria-pressed="${hCond}">刺激伝導系</button><button id="lbbtn" class="${hLab?'on':''}" aria-pressed="${hLab}">文字</button><button id="vesbtn" class="${hVes?'on':''}" aria-pressed="${hVes}">大血管</button><button id="seebtn" class="${hSee?'on':''}" aria-pressed="${hSee}">中を見る（弁）</button></div>
   <div class="hwrap"><div>${hMode==='3d'?'<canvas id="h3" style="width:100%;height:min(76vw,380px);display:block;touch-action:none;cursor:grab" aria-label="心臓の立体モデル。ドラッグで回転"></canvas>':`<div class="heart ${hCond?'':'nocd'} ${hLab?'':'nolb'}">${heartSVG(c)}</div>`}</div>
   <div class="lsel" role="group" aria-label="誘導の切り替え"><div class="t" style="grid-column:auto">肢</div><div class="t" style="grid-column:auto">胸部</div>${['I','V1','II','V2','III','V3','aVR','V4','aVL','V5','aVF','V6'].map(k=>`<button data-k12="${k}" class="${hKey===k?'on':''}">${kLab(k)}</button>`).join('')}</div></div>
-  ${hMode==='3d'?'<div class="sm" style="text-align:center;margin-top:0">心臓は指でドラッグすると回転／右のボタンで誘導を切り替え</div>':'<div class="sm" style="text-align:center;margin-top:0">右のボタンで誘導を切り替え</div>'}
+  ${hMode==='3d'?'<div class="sm" style="text-align:center;margin-top:0">指でドラッグで回転／「正中に戻す」で正面に戻る</div>':'<div class="sm" style="text-align:center;margin-top:0">右のボタンで誘導を切り替え</div>'}
   <div class="leg"><span><span class="dot" style="background:#ffd84a"></span>興奮（脱分極）</span><span><span class="dot" style="background:#ff9f1a"></span>刺激伝導系を伝わる電気</span><span><span class="dot" style="background:#4f86e8"></span>今の誘導が見ている範囲</span><span><span class="dot" style="background:#c8202c"></span>冠動脈（白い点＝血流）</span>${c.zone?'<span><span class="dot" style="background:#c0303a"></span>虚血部位（イメージ）</span>':''}</div>
   <div class="mut" style="margin:8px 0 4px">再生速度</div><div class="seg">${[1,.5,.25].map(k=>`<button data-sp="${k}" class="${hSpeed===k?'on':''}">${k===1?'等速':k+'倍'}</button>`).join('')}</div>
   ${c.cor?`<div class="fb ng" style="margin-top:8px"><b>責任冠動脈：</b>${CORN[c.cor[0]]}${c.cor[1]==='prox'?'の近位部':c.cor[1]==='dist'?'の遠位部':''}が${c.cor[1]==='sten'?'狭くなり（狭窄）、心筋への血流が足りない状態':c.cor[1]==='old'?'閉塞したあとの状態（梗塞後）':'閉塞'}。${c.cor[1]==='sten'?'':'✕より先の血管（灰色の点線）に血液が流れていません。'}</div>`:''}
@@ -1050,7 +1185,7 @@ function detail(c){hRot.auto=true;hSee=!!(c.valve||c.mech);if(c.valve&&!c.mech){
   hc.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const now=performance.now(),tt=((now-hT0)/1000*hSpeed)%DUR;hSpeed=+b.dataset.sp;hT0=now-tt*1000/hSpeed;drawHeart('[data-sp="'+b.dataset.sp+'"]')});
   hc.querySelectorAll('[data-hm]').forEach(b=>b.onclick=()=>{hMode=b.dataset.hm;drawHeart('[data-hm="'+hMode+'"]')});
   hc.querySelector('#corbtn').onclick=()=>{hCor=!hCor;drawHeart('#corbtn')};hc.querySelector('#cdbtn').onclick=()=>{hCond=!hCond;drawHeart('#cdbtn')};hc.querySelector('#lbbtn').onclick=()=>{hLab=!hLab;drawHeart('#lbbtn')};hc.querySelector('#vesbtn').onclick=()=>{hVes=!hVes;drawHeart('#vesbtn')};hc.querySelector('#seebtn').onclick=()=>{hSee=!hSee;drawHeart('#seebtn')};
-  const fb=hc.querySelector('#front');if(fb)fb.onclick=()=>{hRot.y=0;hRot.x=0;hRot.auto=false};
+  const fb=hc.querySelector('#front');if(fb)fb.onclick=()=>{hRot.auto=false;let y0=hRot.y%(2*Math.PI);if(y0>Math.PI)y0-=2*Math.PI;if(y0<-Math.PI)y0+=2*Math.PI;const FX=-.5,FY=-.7;const x0=hRot.x,t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/350),e=1-Math.pow(1-k,3);hRot.y=y0+(FY-y0)*e;hRot.x=x0+(FX-x0)*e;if(k<1&&!hRot.drag)requestAnimationFrame(st)};requestAnimationFrame(st)};
   if(y0!==null){const el2=document.querySelector(anchor);if(el2)window.scrollBy(0,el2.getBoundingClientRect().top-y0)}};
  paint12();
  c12.onclick=e=>{const g=c12._g12;if(!g)return;const r=c12.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,row=Math.floor(py/g.rh);if(row<0||row>5)return;hKey=(px<g.cw?LIMB:CHEST)[row];paint12();drawHeart('#c12')};
