@@ -1154,10 +1154,10 @@ function lib(){document.body.classList.remove('homeview');cur=null;cancelAnimati
  app.innerHTML=h+'</div>';app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(C.find(x=>x.id===b.dataset.id)));window.scrollTo(0,0)}
 const K12=['I','II','III','aVR','aVL','aVF','V1','V2','V3','V4','V5','V6'];
 const VREG12={I:['Ⅰ誘導','高位側壁',[1,0,.05]],II:['Ⅱ誘導','下壁',[.5,.87,.05]],III:['Ⅲ誘導','下壁（やや右）',[-.5,.87,.05]],aVR:['aVR誘導','心臓の右上方（広範な虚血の目安）',[-.87,-.5,.05]],aVL:['aVL誘導','高位側壁',[.87,-.5,.05]],aVF:['aVF誘導','下壁',[0,1,.05]],
- V1:['V1誘導','中隔・右室',[-.45,.1,.9]],V2:['V2誘導','前壁中隔',[-.05,.1,1]],V3:['V3誘導','前壁',[.3,.15,.95]],V4:['V4誘導','前壁・心尖部',[.5,.3,.82]],V5:['V5誘導','前側壁',[.85,.2,.5]],V6:['V6誘導','側壁',[.97,.15,.15]],V4R:['V4R誘導（右側胸部）','右室',[-.85,.3,.45]],V7:['V7誘導（背部）','後壁',[.55,.2,-.8]],V8:['V8誘導（背部）','後壁',[.25,.2,-.95]],V9:['V9誘導（背部）','後壁（中央寄り）',[0,.2,-1]]};
+ V1:['V1誘導','中隔・右室',[-.45,.1,.9]],V2:['V2誘導','前壁中隔',[-.05,.1,1]],V3:['V3誘導','前壁',[.3,.15,.95]],V4:['V4誘導','前壁・心尖部',[.5,.3,.82]],V5:['V5誘導','前側壁',[.8,.2,.6]],V6:['V6誘導','側壁',[1,.15,-.05]],V4R:['V4R誘導（右側胸部）','右室',[-.85,.3,.45]],V7:['V7誘導（背部）','後壁',[.55,.2,-.8]],V8:['V8誘導（背部）','後壁',[.25,.2,-.95]],V9:['V9誘導（背部）','後壁（中央寄り）',[0,.2,-1]]};
 const view12=k=>{const v=VREG12[k];return{key:/^V\d$/.test(k)?'CM'+k[1]:k==='V4R'?'CM4R':k,lab:v[0],area:v[1],d:nz(v[2])}};
 const kLab=k=>k==='I'?'Ⅰ':k==='II'?'Ⅱ':k==='III'?'Ⅲ':k;
-function detail(c){hRot.auto=false;hRot.y=-.45;hRot.x=-.4;hSee=!!(c.valve||c.mech);if(c.valve&&!c.mech){hCor=false;hCond=false;hRot.auto=false;hRot.y=2.4;hRot.x=-.4}else if(c.mech==='pmr'){hCond=false;hRot.auto=false;hRot.y=-1.1;hRot.x=-.3}else{hCor=true;hCond=true}const s=sig(c);hT0=performance.now();
+function detail(c){hRot.auto=false;hRot.y=0;hRot.x=0;hSee=!!(c.valve||c.mech);if(c.valve&&!c.mech){hCor=false;hCond=false;hRot.auto=false;hRot.y=2.4;hRot.x=-.4}else if(c.mech==='pmr'){hCond=false;hRot.auto=false;hRot.y=-1.1;hRot.x=-.3}else{hCor=true;hCond=true}const s=sig(c);hT0=performance.now();
  let hKey=c.lead==='II'?'II':c.lead==='CM4R'?'III':'V'+c.lead[2];
  const hcHTML=()=>{hView=view12(hKey);return `<h2>心臓の動き（シミュレーション）</h2>
   <div class="fb" style="margin:0 0 8px;background:light-dark(#e8f0fd,#15264a);border:1.5px solid #1d5fd0"><b>今見ている誘導：</b>${hView.lab}<br><b>見ている範囲：</b>${hView.area}${leadFigHTML(hView)}</div>
@@ -1185,7 +1185,7 @@ function detail(c){hRot.auto=false;hRot.y=-.45;hRot.x=-.4;hSee=!!(c.valve||c.mec
   hc.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const now=performance.now(),tt=((now-hT0)/1000*hSpeed)%DUR;hSpeed=+b.dataset.sp;hT0=now-tt*1000/hSpeed;drawHeart('[data-sp="'+b.dataset.sp+'"]')});
   hc.querySelectorAll('[data-hm]').forEach(b=>b.onclick=()=>{hMode=b.dataset.hm;drawHeart('[data-hm="'+hMode+'"]')});
   hc.querySelector('#corbtn').onclick=()=>{hCor=!hCor;drawHeart('#corbtn')};hc.querySelector('#cdbtn').onclick=()=>{hCond=!hCond;drawHeart('#cdbtn')};hc.querySelector('#lbbtn').onclick=()=>{hLab=!hLab;drawHeart('#lbbtn')};hc.querySelector('#vesbtn').onclick=()=>{hVes=!hVes;drawHeart('#vesbtn')};hc.querySelector('#seebtn').onclick=()=>{hSee=!hSee;drawHeart('#seebtn')};
-  const fb=hc.querySelector('#front');if(fb)fb.onclick=()=>{hRot.auto=false;let y0=hRot.y%(2*Math.PI);if(y0>Math.PI)y0-=2*Math.PI;if(y0<-Math.PI)y0+=2*Math.PI;const FX=-.4,FY=-.45;const x0=hRot.x,t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/350),e=1-Math.pow(1-k,3);hRot.y=y0+(FY-y0)*e;hRot.x=x0+(FX-x0)*e;if(k<1&&!hRot.drag)requestAnimationFrame(st)};requestAnimationFrame(st)};
+  const fb=hc.querySelector('#front');if(fb)fb.onclick=()=>{hRot.auto=false;let y0=hRot.y%(2*Math.PI);if(y0>Math.PI)y0-=2*Math.PI;if(y0<-Math.PI)y0+=2*Math.PI;const FX=0,FY=0;const x0=hRot.x,t0=performance.now();const st=n=>{const k=Math.min(1,(n-t0)/350),e=1-Math.pow(1-k,3);hRot.y=y0+(FY-y0)*e;hRot.x=x0+(FX-x0)*e;if(k<1&&!hRot.drag)requestAnimationFrame(st)};requestAnimationFrame(st)};
   if(y0!==null){const el2=document.querySelector(anchor);if(el2)window.scrollBy(0,el2.getBoundingClientRect().top-y0)}};
  paint12();
  c12.onclick=e=>{const g=c12._g12;if(!g)return;const r=c12.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,row=Math.floor(py/g.rh);if(row<0||row>5)return;hKey=(px<g.cw?LIMB:CHEST)[row];paint12();drawHeart('#c12')};
